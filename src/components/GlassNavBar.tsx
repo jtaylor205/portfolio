@@ -1,0 +1,132 @@
+'use client';
+
+import React, { useRef, useEffect, useState } from 'react';
+import { motion, useAnimate } from 'framer-motion';
+
+const SECTIONS = [
+  { label: 'Home', id: 'home' },
+  { label: 'About', id: 'about' },
+  { label: 'Projects', id: 'projects' },
+  { label: 'Contact', id: 'contact' },
+] as const;
+
+interface GlassNavBarProps {
+  activeId: string;
+  onSelect: (id: string) => void;
+}
+
+export default function GlassNavBar({ activeId, onSelect }: GlassNavBarProps) {
+  const navRef = useRef<HTMLElement>(null);
+  const pillContainerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [pillStyle, setPillStyle] = useState<{ left: number; width: number } | null>(null);
+  const [animatingToId, setAnimatingToId] = useState<string | null>(null);
+  const [scope, animate] = useAnimate();
+
+  const updatePillPosition = (id: string) => {
+    const container = pillContainerRef.current;
+    const tab = tabRefs.current[id];
+    if (!container || !tab) return;
+    const containerRect = container.getBoundingClientRect();
+    const tabRect = tab.getBoundingClientRect();
+    setPillStyle({
+      left: tabRect.left - containerRect.left,
+      width: tabRect.width,
+    });
+  };
+
+  useEffect(() => {
+    updatePillPosition(activeId);
+  }, [activeId]);
+
+  useEffect(() => {
+    const container = pillContainerRef.current;
+    if (!container) return;
+    const ro = new ResizeObserver(() => updatePillPosition(activeId));
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [activeId]);
+
+  const handleClick = async (id: string) => {
+    if (id === activeId) return;
+    const container = pillContainerRef.current;
+    const nextTab = tabRefs.current[id];
+    if (!container || !nextTab) {
+      onSelect(id);
+      return;
+    }
+    const containerRect = container.getBoundingClientRect();
+    const toRect = nextTab.getBoundingClientRect();
+    const toLeft = toRect.left - containerRect.left;
+    const toWidth = toRect.width;
+
+    onSelect(id);
+    setAnimatingToId(id);
+
+    const pill = scope.current?.querySelector('[data-pill]');
+    if (!pill) {
+      setAnimatingToId(null);
+      return;
+    }
+
+    await animate(pill, { scale: 1.15 }, { duration: 0.12, ease: [0.4, 0, 0.2, 1] });
+    setPillStyle({ left: toLeft, width: toWidth });
+    await new Promise((r) => setTimeout(r, 280));
+    await animate(pill, { scale: 1 }, { duration: 0.12, ease: [0.4, 0, 0.2, 1] });
+    setAnimatingToId(null);
+  };
+
+  return (
+    <nav
+      ref={navRef}
+      className="fixed top-6 left-1/2 z-50 -translate-x-1/2
+        flex items-center gap-1 p-1.5 rounded-4xl
+        bg-white/20 backdrop-blur-xl
+        border border-white/30
+        shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)]"
+    >
+      <div
+        ref={(el) => {
+          pillContainerRef.current = el;
+          (scope as React.MutableRefObject<HTMLDivElement | null>).current = el;
+        }}
+        className="relative flex items-center"
+      >
+        {pillStyle && (
+          <motion.span
+            data-pill
+            className="absolute top-0 rounded-4xl bg-white/25 border border-white/20"
+            style={{ height: '100%', transformOrigin: 'center center' }}
+            animate={{
+              left: pillStyle.left,
+              width: pillStyle.width,
+            }}
+            initial={false}
+            transition={{
+              type: 'tween',
+              duration: 0.3,
+              ease: [0.4, 0, 0.2, 1],
+            }}
+          />
+        )}
+        {SECTIONS.map(({ label, id }) => (
+          <button
+            key={id}
+            ref={(el) => {
+              tabRefs.current[id] = el;
+            }}
+            type="button"
+            onClick={() => handleClick(id)}
+            className={`relative px-5 py-2.5 rounded-4xl text-white/90 font-medium cursor-pointer
+              transition-colors duration-300
+              ${animatingToId === id ? '' : 'hover:text-white hover:bg-white/10'}`}
+          >
+            <span className="relative z-10">{label}</span>
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+export { SECTIONS };
