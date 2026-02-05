@@ -117,7 +117,7 @@ export default function GlassNavBar({ activeId, onSelect }: GlassNavBarProps) {
             }}
             type="button"
             onClick={() => handleClick(id)}
-            className={`relative px-5 py-2.5 rounded-4xl text-white/90 font-medium cursor-pointer
+            className={`relative px-5 py-2.5 rounded-4xl text-white/90 font-medium
               transition-colors duration-300
               ${animatingToId === id ? '' : 'hover:text-white hover:bg-white/10'}`}
           >

@@ -56,7 +56,6 @@ export default function Home() {
   return (
     <div>
       <GlassNavBar activeId={activeId} onSelect={handleNavSelect} />
-      {/* Social Media Buttons - Fixed Position */}
       <SocialButtons />
       <section id="home" className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 flex items-center justify-center p-5">
         <motion.div 
@@ -71,19 +70,14 @@ export default function Home() {
           }}
         >
           <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">
-            Portfolio 2.0
+            Jaedon Taylor
           </h1>
           <p className="text-white/90 text-lg mb-8 leading-relaxed">
-            Welcome to my portfolio with beautiful liquid glass effects and smooth scrolling!
+            Software Engineer @ DataDog
           </p>
-          <GlassButton
-            onClick={() => {
-              const aboutSection = document.getElementById('about');
-              if (aboutSection) {
-                aboutSection.scrollIntoView();
-              }
-            }}
-          />
+          <p className="text-white/90 text-lg mb-8 leading-relaxed">
+            University of Florida Graduate.
+          </p>
         </motion.div>
       </section>
 
