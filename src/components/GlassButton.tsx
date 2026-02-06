@@ -12,7 +12,7 @@ export default function GlassButton({ children, onClick, className = "", icon }:
   return (
     <motion.button
       className={`
-        relative w-16 h-16 rounded-2xl cursor-pointer
+        group relative w-16 h-16 rounded-2xl cursor-pointer
         bg-white/20 backdrop-blur-xl
         border border-white/30
         shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)]

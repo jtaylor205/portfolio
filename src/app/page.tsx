@@ -8,7 +8,7 @@ import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
 import SocialButtons from "@/components/SocialButtons";
 
 export default function Home() {
-  useLenis();
+  const lenisRef = useLenis();
   const [activeId, setActiveId] = useState('home');
   const scrollTargetRef = useRef<string | null>(null);
   const scrollTargetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,7 +46,12 @@ export default function Home() {
     if (scrollTargetTimeoutRef.current) clearTimeout(scrollTargetTimeoutRef.current);
     scrollTargetRef.current = id;
     setActiveId(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const el = document.getElementById(id);
+    if (el && lenisRef.current) {
+      lenisRef.current.scrollTo(el, { duration: 1, force: true });
+    } else {
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
     scrollTargetTimeoutRef.current = setTimeout(() => {
       scrollTargetRef.current = null;
       scrollTargetTimeoutRef.current = null;

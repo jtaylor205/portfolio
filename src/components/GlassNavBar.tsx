@@ -21,6 +21,7 @@ export default function GlassNavBar({ activeId, onSelect }: GlassNavBarProps) {
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [pillStyle, setPillStyle] = useState<{ left: number; width: number } | null>(null);
   const [animatingToId, setAnimatingToId] = useState<string | null>(null);
+  const animationIdRef = useRef<string | null>(null);
   const [scope, animate] = useAnimate();
 
   const updatePillPosition = (id: string) => {
@@ -61,19 +62,24 @@ export default function GlassNavBar({ activeId, onSelect }: GlassNavBarProps) {
     const toWidth = toRect.width;
 
     onSelect(id);
+    animationIdRef.current = id;
     setAnimatingToId(id);
 
     const pill = scope.current?.querySelector('[data-pill]');
     if (!pill) {
+      animationIdRef.current = null;
       setAnimatingToId(null);
       return;
     }
 
     await animate(pill, { scale: 1.15 }, { duration: 0.12, ease: [0.4, 0, 0.2, 1] });
+    if (animationIdRef.current !== id) return;
     setPillStyle({ left: toLeft, width: toWidth });
     await new Promise((r) => setTimeout(r, 280));
+    if (animationIdRef.current !== id) return;
     await animate(pill, { scale: 1 }, { duration: 0.12, ease: [0.4, 0, 0.2, 1] });
-    setAnimatingToId(null);
+    if (animationIdRef.current === id) setAnimatingToId(null);
+    animationIdRef.current = null;
   };
 
   return (

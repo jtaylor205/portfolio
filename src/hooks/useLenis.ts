@@ -1,16 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
 import Snap from 'lenis/snap';
 import { SECTIONS } from '@/components/GlassNavBar';
 
 export const useLenis = () => {
+  const lenisRef = useRef<Lenis | null>(null);
+
   useEffect(() => {
     const lenis = new Lenis({
       autoRaf: true,
     });
+    lenisRef.current = lenis;
 
     const snap = new Snap(lenis, {
-      type: 'mandatory', 
+      type: 'mandatory',
       duration: 0.9,
       debounce: 100,
     });
@@ -25,6 +28,9 @@ export const useLenis = () => {
       unsubs.forEach((u) => u());
       snap.destroy();
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
+
+  return lenisRef;
 };
