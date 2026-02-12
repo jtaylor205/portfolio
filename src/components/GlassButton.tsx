@@ -17,7 +17,7 @@ export default function GlassButton({ children, onClick, className = "", icon }:
         border border-white/30
         shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)]
         flex items-center justify-center
-        transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+        transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
         hover:bg-white/30 
         hover:shadow-[0_12px_40px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.3)]
         active:scale-95
