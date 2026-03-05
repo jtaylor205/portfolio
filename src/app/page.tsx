@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
 import SocialButtons from "@/components/SocialButtons";
@@ -13,10 +13,17 @@ type ScrollSectionProps = {
   children: React.ReactNode;
 };
 
-function ScrollSection({ id, children }: ScrollSectionProps) {
-  const ref = useRef<HTMLElement | null>(null);
+const ScrollSection = forwardRef<HTMLElement, ScrollSectionProps>(function ScrollSection({ id, children }, ref) {
+  const internalRef = useRef<HTMLElement | null>(null);
+  const setRef = (el: HTMLElement | null) => {
+    internalRef.current = el;
+    if (ref) {
+      if (typeof ref === "function") ref(el);
+      else (ref as React.MutableRefObject<HTMLElement | null>).current = el;
+    }
+  };
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: internalRef,
     offset: ["start end", "end start"],
   });
 
@@ -26,22 +33,37 @@ function ScrollSection({ id, children }: ScrollSectionProps) {
   return (
     <motion.section
       id={id}
-      ref={ref}
+      ref={setRef}
       style={{ y, scale }}
       className="relative min-h-screen flex items-center justify-center p-5"
     >
       {children}
     </motion.section>
   );
-}
+});
 
 export default function Home() {
   const lenisRef = useLenis();
+  const aboutSectionRef = useRef<HTMLElement | null>(null);
   const [activeId, setActiveId] = useState('home');
   const scrollTargetRef = useRef<string | null>(null);
   const scrollTargetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [chevronDirection, setChevronDirection] = useState<'down' | 'up'>('down');
   const lastScrollY = useRef(0);
+
+  // Scroll-driven reveal for about: card then timeline items as user scrolls (works with Lenis)
+  const { scrollYProgress: aboutProgress } = useScroll({
+    target: aboutSectionRef,
+    offset: ["start end", "center center"],
+  });
+  const cardOpacity = useTransform(aboutProgress, [0.08, 0.22], [0, 1]);
+  const cardY = useTransform(aboutProgress, [0.08, 0.22], [28, 0]);
+  const ufOpacity = useTransform(aboutProgress, [0.2, 0.36], [0, 1]);
+  const ufX = useTransform(aboutProgress, [0.2, 0.36], [-20, 0]);
+  const baronOpacity = useTransform(aboutProgress, [0.32, 0.48], [0, 1]);
+  const baronX = useTransform(aboutProgress, [0.32, 0.48], [-20, 0]);
+  const datadogOpacity = useTransform(aboutProgress, [0.44, 0.6], [0, 1]);
+  const datadogX = useTransform(aboutProgress, [0.44, 0.6], [-20, 0]);
   const [slotImages, setSlotImages] = useState<Array<'one' | 'two' | 'three' | 'four'>>([
     'one',   // front
     'two',   // back-left
@@ -232,8 +254,8 @@ export default function Home() {
         </motion.div>
       </ScrollSection>
 
-      {/* About Section */}
-      <ScrollSection id="about">
+      {/* About Section — ref used for scroll-driven card + timeline reveal */}
+      <ScrollSection ref={aboutSectionRef} id="about">
         <div className="max-w-6xl w-full grid gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] items-center">
           {/* Photo stack of four — left column, original space */}
           <div className="relative -ml-4 md:-ml-20 flex justify-start">
@@ -242,7 +264,7 @@ export default function Home() {
                 const isFront = slotIndex === 0;
 
                 const baseTransforms = [
-                  { scale: 1.04, x: -70, y: 36, rotate: 0 },           // front
+                  { scale: 1.08, x: -70, y: 36, rotate: 0 },           // front (slightly larger)
                   { scale: 0.96, x: -260, y: -18, rotate: -24 },       // left – wide fan but closer
                   { scale: 0.94, x: -70, y: -82, rotate: 0 },          // center – a bit lower
                   { scale: 0.96, x: 120, y: -18, rotate: 24 },         // right – wide fan but closer
@@ -252,7 +274,7 @@ export default function Home() {
                 const { scale, x, y, rotate } = baseTransforms[slotIndex];
 
                 const hover = isFront
-                  ? { scale: scale + 0.07 }
+                  ? undefined
                   : { scale: scale + 0.14 };
 
                 const handleClick = () => {
@@ -339,9 +361,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right column: copy (same size as before) + timeline alongside */}
-          <div className="grid grid-cols-1 md:grid-cols-[minmax(38rem,1fr)_auto] gap-8 md:gap-10 min-w-0 w-full md:pl-16">
-            {/* Copy — unchanged sizing */}
+          {/* Right column: card + timeline — scroll-driven (Lenis) so they appear as section lands */}
+          <motion.div
+            style={{ opacity: cardOpacity, y: cardY }}
+            className="grid grid-cols-1 md:grid-cols-[minmax(38rem,1fr)_auto] gap-8 md:gap-10 min-w-0 w-full md:pl-16"
+          >
+            {/* Copy card — height drives timeline column */}
             <div className="relative z-50 w-full max-w-xl lg:max-w-3xl p-6 md:p-9 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
               <p className="text-xs md:text-sm uppercase tracking-[0.26em] text-white/60 mb-4">
                 Hello, I&apos;m Jaedon
@@ -357,51 +382,64 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Timeline: UF → Baron → Datadog (vertical) */}
+            {/* Timeline: line from UF to Datadog only; items revealed by scroll progress */}
             <div className="w-full max-w-sm">
-              <div className="relative flex flex-col gap-0">
-                {/* Vertical line */}
-                <div className="absolute left-7 top-7 bottom-7 w-px bg-gradient-to-b from-white/40 via-white/25 to-white/20" aria-hidden />
+              <div className="relative flex flex-col gap-10 py-6">
+                {/* Vertical line — from center of first item to center of last (UF to Datadog) */}
+                <div className="absolute left-7 top-[3.5rem] bottom-[3.5rem] w-px bg-gradient-to-b from-white/40 via-white/25 to-white/20" aria-hidden />
 
                 {/* UF */}
                 <motion.div
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{ duration: 0.4 }}
-                  className="relative z-10 flex flex-row items-center gap-4 py-3 group"
+                  style={{ opacity: ufOpacity, x: ufX }}
+                  className="relative z-10 flex flex-row items-center gap-4 group"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-                    <span className="block text-white/90 transition-colors duration-200 group-hover:text-white">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                        <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                      </svg>
+                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
+                    {/* Default: UF block in white (mask) */}
+                    <span className="absolute inset-0 flex items-center justify-center text-white transition-opacity duration-200 group-hover:opacity-0">
+                      <span className="block w-10 h-10 bg-current [mask-image:url('/images/uf-block.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
                     </span>
+                    {/* Hover: original blue UF SVG */}
+                    <Image
+                      src="/images/uf-block.svg"
+                      alt="University of Florida"
+                      width={48}
+                      height={48}
+                      className="absolute inset-0 w-10 h-10 object-contain m-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none"
+                      sizes="56px"
+                    />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">University of Florida</p>
+                    <p className="font-semibold text-white">University<br />of Florida</p>
                     <p className="text-sm text-white/60">Computer Science</p>
                   </div>
                 </motion.div>
 
-                {/* Baron Technologies */}
+                {/* Baron */}
                 <motion.div
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{ duration: 0.4, delay: 0.08 }}
-                  className="relative z-10 flex flex-row items-center gap-4 py-3 group"
+                  style={{ opacity: baronOpacity, x: baronX }}
+                  className="relative z-10 flex flex-row items-center gap-4 group"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-                    <span className="block text-white/90 transition-colors duration-200 group-hover:text-white">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 4h6v6H4V4z" />
-                        <path d="M14 4h6v6h-6V4z" />
-                        <path d="M4 14h6v6H4v-6z" />
-                        <path d="M14 14h6v6h-6v-6z" />
-                      </svg>
+                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
+                    {/* Default: isometric Rubik's cube (SVG you provided) */}
+                    <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover:opacity-0">
+                      <Image
+                        src="/images/rubiks-cube-isometric.svg"
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 object-contain"
+                        sizes="40px"
+                      />
                     </span>
+                    {/* Hover: Baron logo (filled SVG) */}
+                    <Image
+                      src="/images/baron.svg"
+                      alt="Baron Technologies"
+                      width={48}
+                      height={48}
+                      className="absolute inset-0 w-10 h-10 object-contain m-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none"
+                      sizes="56px"
+                    />
                   </div>
                   <div>
                     <p className="font-semibold text-white">Baron Technologies</p>
@@ -411,19 +449,12 @@ export default function Home() {
 
                 {/* Datadog */}
                 <motion.div
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
-                  transition={{ duration: 0.4, delay: 0.16 }}
-                  className="relative z-10 flex flex-row items-center gap-4 py-3 group"
+                  style={{ opacity: datadogOpacity, x: datadogX }}
+                  className="relative z-10 flex flex-row items-center gap-4 group"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-                    <span className="block text-white/90 transition-colors duration-200 group-hover:text-white">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 20V10" />
-                        <path d="M18 20V4" />
-                        <path d="M6 20v-4" />
-                      </svg>
+                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)] p-1.5">
+                    <span className="block w-full h-full text-white/90 transition-colors duration-200 group-hover:text-[#774AA4]">
+                      <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
                     </span>
                   </div>
                   <div>
@@ -433,7 +464,7 @@ export default function Home() {
                 </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </ScrollSection>
 
