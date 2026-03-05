@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, animate, type MotionValue } from "framer-motion";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
@@ -42,68 +42,177 @@ const ScrollSection = forwardRef<HTMLElement, ScrollSectionProps>(function Scrol
   );
 });
 
-const SKILLS = ["TypeScript", "React", "Next.js", "Node.js", "Python", "SQL"];
+type Skill = { name: string; slug: string; localSrc?: string };
 
-function SkillRevealChip({
+const SKILL_CATEGORIES: { label: string; skills: Skill[] }[] = [
+  {
+    label: "Languages",
+    skills: [
+      { name: "Python", slug: "python" },
+      { name: "JavaScript", slug: "javascript" },
+      { name: "TypeScript", slug: "typescript" },
+      { name: "C", slug: "c" },
+      { name: "C++", slug: "cplusplus" },
+      { name: "Go", slug: "go" },
+      { name: "Swift", slug: "swift" },
+    ],
+  },
+  {
+    label: "Data & Infrastructure",
+    skills: [
+      { name: "PostgreSQL", slug: "postgresql" },
+      { name: "MySQL", slug: "mysql" },
+      { name: "Redis", slug: "redis" },
+      { name: "Cassandra", slug: "apachecassandra" },
+      { name: "Kubernetes", slug: "kubernetes" },
+      { name: "Docker", slug: "docker" },
+      { name: "Git", slug: "git" },
+    ],
+  },
+  {
+    label: "Frontend",
+    skills: [
+      { name: "React", slug: "react" },
+      { name: "Next.js", slug: "nextdotjs" },
+      { name: "Tailwind", slug: "tailwindcss" },
+      { name: "HTML", slug: "html5" },
+      { name: "CSS", slug: "css" },
+    ],
+  },
+  {
+    label: "Backend & APIs",
+    skills: [
+      { name: "Node.js", slug: "nodedotjs" },
+      { name: "gRPC", slug: "grpc", localSrc: "/images/grpc.svg" },
+      { name: "Protobuf", slug: "protocolbuffers" },
+      { name: "Kafka", slug: "apachekafka" },
+    ],
+  },
+];
+
+const TOTAL_SKILLS = SKILL_CATEGORIES.reduce((sum, c) => sum + c.skills.length, 0);
+
+function SkillPill({
   name,
-  index,
-  total,
+  slug,
+  localSrc,
+  globalIndex,
+  scrollProgress,
+}: Skill & { globalIndex: number; scrollProgress: MotionValue<number> }) {
+  const [imgError, setImgError] = useState(false);
+  const imgSrc = localSrc ?? `https://cdn.simpleicons.org/${slug}/ffffff`;
+  const start = 0.12 + (globalIndex / TOTAL_SKILLS) * 0.60;
+  const end = start + (1 / TOTAL_SKILLS) * 0.60;
+  const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
+  const y = useTransform(scrollProgress, [start, end], [16, 0]);
+  return (
+    <motion.div
+      style={{ opacity, y }}
+      whileHover={{ backgroundColor: "rgba(255,255,255,0.18)" }}
+      transition={{ duration: 0.15 }}
+      className="flex flex-col items-center gap-2 pt-3 pb-2.5 px-3 rounded-xl bg-white/10 backdrop-blur-xl border border-white/15 shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-[76px] cursor-default"
+    >
+      {imgError ? (
+        <span className="h-9 flex items-center text-white/70 text-[10px] font-bold uppercase tracking-wide text-center leading-tight">{name}</span>
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={imgSrc}
+          alt={name}
+          className={`w-9 h-9 object-contain${localSrc ? " brightness-0 invert" : ""}`}
+          loading="lazy"
+          onError={() => setImgError(true)}
+        />
+      )}
+      <span className="text-white/75 text-[11px] font-medium text-center leading-tight">{name}</span>
+    </motion.div>
+  );
+}
+
+function SkillCategory({
+  label,
+  skills,
+  startIndex,
   scrollProgress,
 }: {
-  name: string;
-  index: number;
-  total: number;
+  label: string;
+  skills: Skill[];
+  startIndex: number;
   scrollProgress: MotionValue<number>;
 }) {
-  const start = 0.06 + (index / total) * 0.78;
-  const end = 0.06 + ((index + 1) / total) * 0.78;
-  const progress = useTransform(scrollProgress, [start, end], [0, 1]);
-  const y = useTransform(progress, [0, 1], [28, 0]);
-  const opacity = useTransform(progress, [0, 1], [0, 1]);
+  const labelStart = 0.12 + (startIndex / TOTAL_SKILLS) * 0.60;
+  const labelEnd = labelStart + (1 / TOTAL_SKILLS) * 0.60;
+  const labelOpacity = useTransform(scrollProgress, [labelStart, labelEnd], [0, 1]);
+  const labelY = useTransform(scrollProgress, [labelStart, labelEnd], [16, 0]);
   return (
-    <motion.span
-      style={{ opacity, y }}
-      className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium"
-    >
-      {name}
-    </motion.span>
+    <div>
+      <motion.div style={{ opacity: labelOpacity, y: labelY }} className="flex items-center gap-3 mb-3">
+        <span className="text-[10px] uppercase tracking-[0.18em] text-white/40 font-semibold whitespace-nowrap">
+          {label}
+        </span>
+        <div className="flex-1 h-px bg-white/10" />
+      </motion.div>
+      <div className="flex flex-wrap gap-2">
+        {skills.map((skill, i) => (
+          <SkillPill
+            key={skill.name}
+            {...skill}
+            globalIndex={startIndex + i}
+            scrollProgress={scrollProgress}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
 export default function Home() {
   const lenisRef = useLenis();
+  const homeSectionRef = useRef<HTMLDivElement | null>(null);
   const aboutSectionRef = useRef<HTMLDivElement | null>(null);
   const skillsSectionRef = useRef<HTMLDivElement | null>(null);
   const [activeId, setActiveId] = useState('home');
   const scrollTargetRef = useRef<string | null>(null);
   const scrollTargetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [chevronDirection, setChevronDirection] = useState<'down' | 'up'>('down');
+  const contentOpacity = useMotionValue(1);
   const lastScrollY = useRef(0);
 
-  // About: Apple-style sticky scroll-reveal – card, then line, then UF → Baron → Datadog
+  // Home: sticky scroll-reveal – name mounts immediately, chips reveal on scroll
+  const { scrollYProgress: homeProgress } = useScroll({
+    target: homeSectionRef,
+    offset: ["start start", "end end"],
+  });
+  const chip1Opacity = useTransform(homeProgress, [0.10, 0.25], [0, 1]);
+  const chip1Y = useTransform(homeProgress, [0.10, 0.25], [20, 0]);
+  const chip2Opacity = useTransform(homeProgress, [0.38, 0.53], [0, 1]);
+  const chip2Y = useTransform(homeProgress, [0.38, 0.53], [20, 0]);
+
+  // About: Apple-style sticky scroll-reveal – card → photos → timeline
   const { scrollYProgress: aboutProgress } = useScroll({
     target: aboutSectionRef,
     offset: ["start start", "end end"],
   });
   const cardOpacity = useTransform(aboutProgress, [0, 0.12], [0, 1]);
   const cardY = useTransform(aboutProgress, [0, 0.12], [28, 0]);
-  const lineOpacity = useTransform(aboutProgress, [0.1, 0.22], [0, 1]);
-  const lineScaleY = useTransform(aboutProgress, [0.1, 0.22], [0, 1]);
-  const ufOpacity = useTransform(aboutProgress, [0.2, 0.38], [0, 1]);
-  const ufX = useTransform(aboutProgress, [0.2, 0.38], [-20, 0]);
-  const baronOpacity = useTransform(aboutProgress, [0.36, 0.54], [0, 1]);
-  const baronX = useTransform(aboutProgress, [0.36, 0.54], [-20, 0]);
-  const datadogOpacity = useTransform(aboutProgress, [0.52, 0.7], [0, 1]);
-  const datadogX = useTransform(aboutProgress, [0.52, 0.7], [-20, 0]);
+  const photosOpacity = useTransform(aboutProgress, [0.15, 0.28], [0, 1]);
+  const photosY = useTransform(aboutProgress, [0.15, 0.28], [28, 0]);
+  const lineOpacity = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
+  const lineScaleY = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
+  const ufOpacity = useTransform(aboutProgress, [0.38, 0.52], [0, 1]);
+  const ufX = useTransform(aboutProgress, [0.38, 0.52], [-20, 0]);
+  const baronOpacity = useTransform(aboutProgress, [0.50, 0.64], [0, 1]);
+  const baronX = useTransform(aboutProgress, [0.50, 0.64], [-20, 0]);
+  const datadogOpacity = useTransform(aboutProgress, [0.62, 0.76], [0, 1]);
+  const datadogX = useTransform(aboutProgress, [0.62, 0.76], [-20, 0]);
 
-  // Skills: sticky scroll-reveal (Apple-style) – section “stops” and items pop in as you scroll
+  // Skills: sticky scroll-reveal (Apple-style) – section "stops" and items pop in as you scroll
   const { scrollYProgress: skillsProgress } = useScroll({
     target: skillsSectionRef,
     offset: ["start start", "end end"],
   });
   const skillsTitleOpacity = useTransform(skillsProgress, [0, 0.12], [0, 1]);
   const skillsTitleY = useTransform(skillsProgress, [0, 0.12], [20, 0]);
-
 
   const [slotImages, setSlotImages] = useState<Array<'one' | 'two' | 'three' | 'four'>>([
     'one',   // front
@@ -187,15 +296,22 @@ export default function Home() {
     const viewportHeight = window.innerHeight;
     // Sticky scroll-reveal sections: scroll to end so content is fully revealed
     const isStickyReveal = id === "about" || id === "skills";
-    const targetScrollY = isStickyReveal
-      ? sectionTop + sectionHeight - viewportHeight
-      : sectionTop + sectionHeight / 2 - viewportHeight / 2;
-    // Smooth scroll when using nav; effective progress keeps About/Skills at “full” as we pass through (no reveal/undo animations)
-    if (lenisRef.current) {
-      lenisRef.current.scrollTo(Math.max(0, targetScrollY), { immediate: true });
-    } else {
-      window.scrollTo({ top: Math.max(0, targetScrollY) });
-    }
+    const targetScrollY = id === "home"
+      ? 0
+      : isStickyReveal
+        ? sectionTop + sectionHeight - viewportHeight
+        : sectionTop + sectionHeight / 2 - viewportHeight / 2;
+    const target = Math.max(0, targetScrollY);
+    // Fade out → instant jump → fade in
+    animate(contentOpacity, 0, { duration: 0.15, ease: "easeIn" }).then(() => {
+      if (document.scrollingElement) {
+        (document.scrollingElement as HTMLElement).scrollTop = target;
+      }
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(target, { immediate: true });
+      }
+      animate(contentOpacity, 1, { duration: 0.35, ease: "easeOut" });
+    });
     scrollTargetTimeoutRef.current = setTimeout(() => {
       scrollTargetRef.current = null;
       scrollTargetTimeoutRef.current = null;
@@ -207,108 +323,113 @@ export default function Home() {
       <ThreeBackground />
       <GlassNavBar activeId={activeId} onSelect={handleNavSelect} />
       <SocialButtons />
-      <ScrollSection id="home">
-        <div className="relative flex flex-col items-center gap-6 text-center">
-          {/* Name – Monument Extended stub (you can wire the real font later) */}
-          <motion.h1
-            className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
-            style={{
-              fontFamily: 'var(--font-monument-wide), var(--font-poppins), system-ui',
-            }}
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.9, ease: "easeOut" }}
+      <motion.div style={{ opacity: contentOpacity }}>
+      {/* Home: Apple-style sticky block – name mounts immediately, chips reveal on scroll */}
+      <div
+        id="home"
+        ref={homeSectionRef}
+        className="relative"
+        style={{ height: "320vh" }}
+      >
+        <div className="relative sticky top-0 h-screen flex items-center justify-center p-5">
+          <div className="flex flex-col items-center gap-6 text-center">
+            {/* Name – mounts on load */}
+            <motion.h1
+              className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+              style={{
+                fontFamily: 'var(--font-monument-wide), var(--font-poppins), system-ui',
+              }}
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+            >
+              Jaedon&nbsp;Taylor
+            </motion.h1>
+
+            {/* Glassy subtitle chips – scroll-driven reveal */}
+            <div className="flex flex-col items-center gap-3">
+              <motion.div
+                className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
+                style={{ opacity: chip1Opacity, y: chip1Y }}
+              >
+                University of Florida Student
+              </motion.div>
+
+              <motion.div
+                className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
+                style={{ opacity: chip2Opacity, y: chip2Y }}
+              >
+                Incoming Software Engineer @ Datadog
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Scroll indicator – floating chevrons */}
+          <motion.div
+            className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
           >
-            Jaedon&nbsp;Taylor
-          </motion.h1>
-
-          {/* Glassy subtitle chips */}
-          <div className="flex flex-col items-center gap-3">
-            <motion.div
-              className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut", delay: 0.4 }}
-            >
-              University of Florida Student
-            </motion.div>
-
-            <motion.div
-              className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut", delay: 0.6 }}
-            >
-              Incoming Software Engineer @ Datadog
-            </motion.div>
-          </div>
+            <div className="flex flex-col items-center -space-y-2">
+              {/* Top chevron - more opaque */}
+              <motion.svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-white"
+                animate={{
+                  y: [0, 2, 4, 2, 0],
+                  opacity: chevronDirection === 'down' ? [1, 0.8, 0.6, 0.8, 1] : [0.6, 0.8, 1, 0.8, 0.6],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: chevronDirection === 'down' ? 0.3 : 0,
+                }}
+                key={`top-${chevronDirection}`}
+              >
+                <path
+                  d="M7 10L12 15L17 10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.svg>
+              {/* Bottom chevron - more transparent */}
+              <motion.svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-white"
+                animate={{
+                  y: [0, 2, 4, 2, 0],
+                  opacity: chevronDirection === 'down' ? [0.4, 0.28, 0.15, 0.28, 0.4] : [0.15, 0.28, 0.4, 0.28, 0.15],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: chevronDirection === 'down' ? 0 : 0.3,
+                }}
+                key={`bottom-${chevronDirection}`}
+              >
+                <path
+                  d="M7 10L12 15L17 10"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.svg>
+            </div>
+          </motion.div>
         </div>
-
-        {/* Scroll indicator – floating chevrons */}
-        <motion.div
-          className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
-        >
-          <div className="flex flex-col items-center -space-y-2">
-            {/* Top chevron - more opaque */}
-            <motion.svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-white"
-              animate={{
-                y: [0, 2, 4, 2, 0],
-                opacity: chevronDirection === 'down' ? [1, 0.8, 0.6, 0.8, 1] : [0.6, 0.8, 1, 0.8, 0.6],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "linear",
-                delay: chevronDirection === 'down' ? 0.3 : 0,
-              }}
-              key={`top-${chevronDirection}`}
-            >
-              <path
-                d="M7 10L12 15L17 10"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </motion.svg>
-            {/* Bottom chevron - more transparent */}
-            <motion.svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-white"
-              animate={{
-                y: [0, 2, 4, 2, 0],
-                opacity: chevronDirection === 'down' ? [0.4, 0.28, 0.15, 0.28, 0.4] : [0.15, 0.28, 0.4, 0.28, 0.15],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "linear",
-                delay: chevronDirection === 'down' ? 0 : 0.3,
-              }}
-              key={`bottom-${chevronDirection}`}
-            >
-              <path
-                d="M7 10L12 15L17 10"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </motion.svg>
-          </div>
-        </motion.div>
-      </ScrollSection>
+      </div>
 
       {/* About: Apple-style sticky block – scroll through section, line then UF → Baron → Datadog reveal */}
       <div
@@ -319,8 +440,11 @@ export default function Home() {
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="max-w-6xl w-full grid gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] items-center">
-          {/* Photo stack of four — left column, original space */}
-          <div className="relative -ml-4 md:-ml-20 flex justify-start">
+          {/* Photo stack of four — left column, scroll-driven reveal */}
+          <motion.div
+            style={{ opacity: photosOpacity, y: photosY }}
+            className="relative -ml-4 md:-ml-20 flex justify-start"
+          >
             <div className="relative w-full max-w-md aspect-[4/5]">
               {slotImages.map((imageKey, slotIndex) => {
                 const isFront = slotIndex === 0;
@@ -351,11 +475,8 @@ export default function Home() {
                 };
 
                 const commonProps = {
-                  initial: { opacity: 0, y: y + 20 },
-                  whileInView: { opacity: 1 },
-                  animate: { scale, x, y, rotate },
+                  animate: { scale, x, y, rotate, opacity: 1 },
                   whileHover: hover,
-                  viewport: { once: true, amount: 0.4 },
                   transition: {
                     stiffness: 230,
                     damping: 26,
@@ -421,7 +542,7 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right column: card + timeline — scroll-driven (Lenis) so they appear as section lands */}
           <motion.div
@@ -434,19 +555,19 @@ export default function Home() {
                 Hello, I&apos;m Jaedon
               </p>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-5 md:mb-6 drop-shadow-lg leading-tight md:leading-snug">
-                Building experiences that actually feel good to use.
+                Building systems that scale, and software that lasts.
               </h2>
               <p className="text-white/90 text-base md:text-lg leading-relaxed md:leading-relaxed">
-                I&apos;m an undergraduate Computer Science student at the University of Florida and an incoming
-                Software Engineer at Datadog. I care a lot about the intersection of product, design, and
-                engineering—shaping ideas into interfaces that feel intuitive, responsive, and a little bit
-                memorable.
+                I&apos;m a Computer Science student at the University of Florida and an incoming Software Engineer
+                at Datadog. I gravitate toward backend and distributed systems work, building software that has
+                to hold up when things get complicated. I&apos;ve worked across the stack and pick up whatever
+                the problem needs. I care about writing code that&apos;s correct, fast, and built to last.
               </p>
             </div>
 
             {/* Timeline: line from UF to Datadog only; items revealed by scroll progress */}
-            <div className="w-full max-w-sm">
-              <div className="relative flex flex-col gap-10 py-6">
+            <div className="w-full max-w-sm h-full">
+              <div className="relative flex flex-col justify-between h-full py-6">
                 {/* Vertical line — reveals first (grows down), then timeline items */}
                 <motion.div
                   style={{
@@ -540,31 +661,34 @@ export default function Home() {
       </div>
 
       {/* Skills Section */}
-      {/* Skills: Apple-style sticky block – scroll “through” the section, content stays fixed and items reveal */}
+      {/* Skills: Apple-style sticky block – scroll "through" the section, content stays fixed and items reveal */}
       <div
         id="skills"
         ref={skillsSectionRef}
         className="relative"
-        style={{ height: "400vh" }}
+        style={{ height: "500vh" }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
-          <div className="max-w-4xl w-full">
+          <div className="max-w-3xl w-full">
             <motion.h2
               style={{ opacity: skillsTitleOpacity, y: skillsTitleY }}
-              className="text-3xl font-bold text-white mb-12 text-center drop-shadow-lg"
+              className="text-3xl font-bold text-white mb-8 text-center drop-shadow-lg"
             >
-              Skills
+              My Skills
             </motion.h2>
-            <div className="flex flex-wrap justify-center gap-3">
-              {SKILLS.map((name, i) => (
-                <SkillRevealChip
-                  key={name}
-                  name={name}
-                  index={i}
-                  total={SKILLS.length}
-                  scrollProgress={skillsProgress}
-                />
-              ))}
+            <div className="flex flex-col gap-6">
+              {SKILL_CATEGORIES.map(({ label, skills }, catIdx) => {
+                const startIndex = SKILL_CATEGORIES.slice(0, catIdx).reduce((sum, c) => sum + c.skills.length, 0);
+                return (
+                  <SkillCategory
+                    key={label}
+                    label={label}
+                    skills={skills}
+                    startIndex={startIndex}
+                    scrollProgress={skillsProgress}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
@@ -606,13 +730,14 @@ export default function Home() {
             Get In Touch
           </h2>
           <p className="text-white/90 text-lg mb-8 leading-relaxed">
-            Ready to work together? Let's create something amazing!
+            Ready to work together? Let&apos;s create something amazing!
           </p>
           <button className="px-6 py-3 text-base bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all">
             Contact Me
           </button>
         </div>
       </ScrollSection>
+      </motion.div>
     </div>
   );
 }
