@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
@@ -14,16 +14,16 @@ type ScrollSectionProps = {
 };
 
 const ScrollSection = forwardRef<HTMLElement, ScrollSectionProps>(function ScrollSection({ id, children }, ref) {
-  const internalRef = useRef<HTMLElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
   const setRef = (el: HTMLElement | null) => {
-    internalRef.current = el;
+    sectionRef.current = el;
     if (ref) {
       if (typeof ref === "function") ref(el);
       else (ref as React.MutableRefObject<HTMLElement | null>).current = el;
     }
   };
   const { scrollYProgress } = useScroll({
-    target: internalRef,
+    target: sectionRef,
     offset: ["start end", "end start"],
   });
 
@@ -31,39 +31,80 @@ const ScrollSection = forwardRef<HTMLElement, ScrollSectionProps>(function Scrol
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.97, 1, 0.97]);
 
   return (
-    <motion.section
-      id={id}
-      ref={setRef}
-      style={{ y, scale }}
-      className="relative min-h-screen flex items-center justify-center p-5"
-    >
-      {children}
-    </motion.section>
+    <section ref={setRef} id={id} className="relative min-h-screen">
+      <motion.div
+        style={{ y, scale }}
+        className="absolute inset-0 flex items-center justify-center p-5"
+      >
+        {children}
+      </motion.div>
+    </section>
   );
 });
 
+const SKILLS = ["TypeScript", "React", "Next.js", "Node.js", "Python", "SQL"];
+
+function SkillRevealChip({
+  name,
+  index,
+  total,
+  scrollProgress,
+}: {
+  name: string;
+  index: number;
+  total: number;
+  scrollProgress: MotionValue<number>;
+}) {
+  const start = 0.06 + (index / total) * 0.78;
+  const end = 0.06 + ((index + 1) / total) * 0.78;
+  const progress = useTransform(scrollProgress, [start, end], [0, 1]);
+  const y = useTransform(progress, [0, 1], [28, 0]);
+  const opacity = useTransform(progress, [0, 1], [0, 1]);
+  return (
+    <motion.span
+      style={{ opacity, y }}
+      className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium"
+    >
+      {name}
+    </motion.span>
+  );
+}
+
 export default function Home() {
   const lenisRef = useLenis();
-  const aboutSectionRef = useRef<HTMLElement | null>(null);
+  const aboutSectionRef = useRef<HTMLDivElement | null>(null);
+  const skillsSectionRef = useRef<HTMLDivElement | null>(null);
   const [activeId, setActiveId] = useState('home');
   const scrollTargetRef = useRef<string | null>(null);
   const scrollTargetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [chevronDirection, setChevronDirection] = useState<'down' | 'up'>('down');
   const lastScrollY = useRef(0);
 
-  // Scroll-driven reveal for about: card then timeline items as user scrolls (works with Lenis)
+  // About: Apple-style sticky scroll-reveal – card, then line, then UF → Baron → Datadog
   const { scrollYProgress: aboutProgress } = useScroll({
     target: aboutSectionRef,
-    offset: ["start end", "center center"],
+    offset: ["start start", "end end"],
   });
-  const cardOpacity = useTransform(aboutProgress, [0.08, 0.22], [0, 1]);
-  const cardY = useTransform(aboutProgress, [0.08, 0.22], [28, 0]);
-  const ufOpacity = useTransform(aboutProgress, [0.2, 0.36], [0, 1]);
-  const ufX = useTransform(aboutProgress, [0.2, 0.36], [-20, 0]);
-  const baronOpacity = useTransform(aboutProgress, [0.32, 0.48], [0, 1]);
-  const baronX = useTransform(aboutProgress, [0.32, 0.48], [-20, 0]);
-  const datadogOpacity = useTransform(aboutProgress, [0.44, 0.6], [0, 1]);
-  const datadogX = useTransform(aboutProgress, [0.44, 0.6], [-20, 0]);
+  const cardOpacity = useTransform(aboutProgress, [0, 0.12], [0, 1]);
+  const cardY = useTransform(aboutProgress, [0, 0.12], [28, 0]);
+  const lineOpacity = useTransform(aboutProgress, [0.1, 0.22], [0, 1]);
+  const lineScaleY = useTransform(aboutProgress, [0.1, 0.22], [0, 1]);
+  const ufOpacity = useTransform(aboutProgress, [0.2, 0.38], [0, 1]);
+  const ufX = useTransform(aboutProgress, [0.2, 0.38], [-20, 0]);
+  const baronOpacity = useTransform(aboutProgress, [0.36, 0.54], [0, 1]);
+  const baronX = useTransform(aboutProgress, [0.36, 0.54], [-20, 0]);
+  const datadogOpacity = useTransform(aboutProgress, [0.52, 0.7], [0, 1]);
+  const datadogX = useTransform(aboutProgress, [0.52, 0.7], [-20, 0]);
+
+  // Skills: sticky scroll-reveal (Apple-style) – section “stops” and items pop in as you scroll
+  const { scrollYProgress: skillsProgress } = useScroll({
+    target: skillsSectionRef,
+    offset: ["start start", "end end"],
+  });
+  const skillsTitleOpacity = useTransform(skillsProgress, [0, 0.12], [0, 1]);
+  const skillsTitleY = useTransform(skillsProgress, [0, 0.12], [20, 0]);
+
+
   const [slotImages, setSlotImages] = useState<Array<'one' | 'two' | 'three' | 'four'>>([
     'one',   // front
     'two',   // back-left
@@ -71,33 +112,38 @@ export default function Home() {
     'four',  // back-right
   ]);
 
+  // Active section = section that contains the viewport center (forward order, last match wins so About wins over Home when overlapping)
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const target = scrollTargetRef.current;
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const id = entry.target.id;
-          if (target !== null) {
-            if (id === target) {
-              if (scrollTargetTimeoutRef.current) clearTimeout(scrollTargetTimeoutRef.current);
-              scrollTargetTimeoutRef.current = null;
-              scrollTargetRef.current = null;
-              setActiveId(id);
-            }
-            break;
-          }
-          setActiveId(id);
-          break;
+    const updateActiveFromScroll = () => {
+      const viewportCenter = window.scrollY + window.innerHeight / 2;
+      let active: string | null = null;
+      for (let i = 0; i < SECTIONS.length; i++) {
+        const el = document.getElementById(SECTIONS[i].id);
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        const height = el.offsetHeight;
+        if (viewportCenter >= top && viewportCenter < top + height) {
+          active = SECTIONS[i].id;
         }
-      },
-      { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
-    );
-    SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
+      }
+      if (active !== null) setActiveId(active);
+    };
+
+    const raf = { current: 0 };
+    const onScroll = () => {
+      if (raf.current) cancelAnimationFrame(raf.current);
+      raf.current = requestAnimationFrame(() => {
+        updateActiveFromScroll();
+        raf.current = 0;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    updateActiveFromScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf.current) cancelAnimationFrame(raf.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -135,10 +181,20 @@ export default function Home() {
     scrollTargetRef.current = id;
     setActiveId(id);
     const el = document.getElementById(id);
-    if (el && lenisRef.current) {
-      lenisRef.current.scrollTo(el, { duration: 1, force: true });
+    if (!el) return;
+    const sectionTop = el.getBoundingClientRect().top + window.scrollY;
+    const sectionHeight = el.offsetHeight;
+    const viewportHeight = window.innerHeight;
+    // Sticky scroll-reveal sections: scroll to end so content is fully revealed
+    const isStickyReveal = id === "about" || id === "skills";
+    const targetScrollY = isStickyReveal
+      ? sectionTop + sectionHeight - viewportHeight
+      : sectionTop + sectionHeight / 2 - viewportHeight / 2;
+    // Smooth scroll when using nav; effective progress keeps About/Skills at “full” as we pass through (no reveal/undo animations)
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(Math.max(0, targetScrollY), { immediate: true });
     } else {
-      el?.scrollIntoView({ behavior: 'smooth' });
+      window.scrollTo({ top: Math.max(0, targetScrollY) });
     }
     scrollTargetTimeoutRef.current = setTimeout(() => {
       scrollTargetRef.current = null;
@@ -254,9 +310,15 @@ export default function Home() {
         </motion.div>
       </ScrollSection>
 
-      {/* About Section — ref used for scroll-driven card + timeline reveal */}
-      <ScrollSection ref={aboutSectionRef} id="about">
-        <div className="max-w-6xl w-full grid gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] items-center">
+      {/* About: Apple-style sticky block – scroll through section, line then UF → Baron → Datadog reveal */}
+      <div
+        id="about"
+        ref={aboutSectionRef}
+        className="relative"
+        style={{ height: "400vh" }}
+      >
+        <div className="sticky top-0 h-screen flex items-center justify-center p-5">
+          <div className="max-w-6xl w-full grid gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] items-center">
           {/* Photo stack of four — left column, original space */}
           <div className="relative -ml-4 md:-ml-20 flex justify-start">
             <div className="relative w-full max-w-md aspect-[4/5]">
@@ -385,8 +447,16 @@ export default function Home() {
             {/* Timeline: line from UF to Datadog only; items revealed by scroll progress */}
             <div className="w-full max-w-sm">
               <div className="relative flex flex-col gap-10 py-6">
-                {/* Vertical line — from center of first item to center of last (UF to Datadog) */}
-                <div className="absolute left-7 top-[3.5rem] bottom-[3.5rem] w-px bg-gradient-to-b from-white/40 via-white/25 to-white/20" aria-hidden />
+                {/* Vertical line — reveals first (grows down), then timeline items */}
+                <motion.div
+                  style={{
+                    opacity: lineOpacity,
+                    scaleY: lineScaleY,
+                    transformOrigin: "top",
+                  }}
+                  className="absolute left-7 top-[3.5rem] bottom-[3.5rem] w-px bg-gradient-to-b from-white/40 via-white/25 to-white/20"
+                  aria-hidden
+                />
 
                 {/* UF */}
                 <motion.div
@@ -466,7 +536,39 @@ export default function Home() {
             </div>
           </motion.div>
         </div>
-      </ScrollSection>
+        </div>
+      </div>
+
+      {/* Skills Section */}
+      {/* Skills: Apple-style sticky block – scroll “through” the section, content stays fixed and items reveal */}
+      <div
+        id="skills"
+        ref={skillsSectionRef}
+        className="relative"
+        style={{ height: "400vh" }}
+      >
+        <div className="sticky top-0 h-screen flex items-center justify-center p-5">
+          <div className="max-w-4xl w-full">
+            <motion.h2
+              style={{ opacity: skillsTitleOpacity, y: skillsTitleY }}
+              className="text-3xl font-bold text-white mb-12 text-center drop-shadow-lg"
+            >
+              Skills
+            </motion.h2>
+            <div className="flex flex-wrap justify-center gap-3">
+              {SKILLS.map((name, i) => (
+                <SkillRevealChip
+                  key={name}
+                  name={name}
+                  index={i}
+                  total={SKILLS.length}
+                  scrollProgress={skillsProgress}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Projects Section */}
       <ScrollSection id="projects">
