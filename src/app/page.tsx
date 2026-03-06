@@ -166,11 +166,152 @@ function SkillCategory({
   );
 }
 
+type Project = {
+  name: string;
+  category: string;
+  tech: { name: string; slug: string }[];
+  github?: string;
+};
+
+const PROJECTS: Project[] = [
+  {
+    name: "HTTP Capture & Replay",
+    category: "Developer Tools",
+    tech: [
+      { name: "Go", slug: "go" },
+      { name: "Next.js", slug: "nextdotjs" },
+      { name: "TypeScript", slug: "typescript" },
+      { name: "SQLite", slug: "sqlite" },
+    ],
+  },
+  {
+    name: "Solace",
+    category: "Mobile App / AI",
+    tech: [
+      { name: "React Native", slug: "react" },
+      { name: "JavaScript", slug: "javascript" },
+      { name: "Firebase", slug: "firebase" },
+      { name: "Gemini", slug: "googlegemini" },
+    ],
+    github: "#",
+  },
+  {
+    name: "Minesweeper",
+    category: "Game Development",
+    tech: [
+      { name: "C++", slug: "cplusplus" },
+    ],
+    github: "#",
+  },
+  {
+    name: "Food Fridge",
+    category: "Mobile App",
+    tech: [
+      { name: "Swift", slug: "swift" },
+      { name: "Firebase", slug: "firebase" },
+    ],
+    github: "#",
+  },
+  {
+    name: "Phone Guru",
+    category: "Web Development / AI",
+    tech: [
+      { name: "Python", slug: "python" },
+      { name: "HTML", slug: "html5" },
+      { name: "CSS", slug: "css" },
+      { name: "JavaScript", slug: "javascript" },
+      { name: "OpenAI", slug: "chatgpt" },
+    ],
+    github: "#",
+  },
+  {
+    name: "Sudoku Generator",
+    category: "Game Development",
+    tech: [
+      { name: "Python", slug: "python" },
+    ],
+    github: "#",
+  },
+  {
+    name: "File System",
+    category: "Operating Systems",
+    tech: [
+      { name: "C", slug: "c" },
+      { name: "C++", slug: "cplusplus" },
+      { name: "Linux", slug: "linux" },
+    ],
+    github: "#",
+  },
+  {
+    name: "Stock Market Trading Analyzer",
+    category: "Data Analysis",
+    tech: [
+      { name: "Python", slug: "python" },
+    ],
+  },
+];
+
+function ProjectCard({
+  name,
+  category,
+  tech,
+  github,
+  index,
+  scrollProgress,
+}: Project & { index: number; scrollProgress: MotionValue<number> }) {
+  const total = PROJECTS.length;
+  const start = 0.10 + (index / total) * 0.55;
+  const end = start + (1 / total) * 0.55;
+  const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
+  const y = useTransform(scrollProgress, [start, end], [24, 0]);
+  return (
+    <motion.div
+      style={{ opacity, y }}
+      className="p-5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col gap-3 min-h-[140px]"
+    >
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{category}</p>
+        <h3 className="text-base font-bold text-white leading-snug">{name}</h3>
+      </div>
+      <div className="flex flex-wrap gap-1.5 flex-1 items-start">
+        {tech.map(({ slug, name: techName }) => (
+          <div
+            key={slug}
+            className="w-9 h-9 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://cdn.simpleicons.org/${slug}/ffffff`}
+              alt={techName}
+              className="w-5 h-5 object-contain"
+              loading="lazy"
+              onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
+            />
+          </div>
+        ))}
+      </div>
+      {github && (
+        <a
+          href={github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-[11px] text-white/70 hover:bg-white/20 hover:text-white transition-colors"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-3.5 h-3.5 object-contain" loading="lazy" />
+          GitHub
+        </a>
+      )}
+    </motion.div>
+  );
+}
+
 export default function Home() {
   const lenisRef = useLenis();
   const homeSectionRef = useRef<HTMLDivElement | null>(null);
   const aboutSectionRef = useRef<HTMLDivElement | null>(null);
   const skillsSectionRef = useRef<HTMLDivElement | null>(null);
+  const projectsSectionRef = useRef<HTMLDivElement | null>(null);
   const [activeId, setActiveId] = useState('home');
   const scrollTargetRef = useRef<string | null>(null);
   const scrollTargetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -195,8 +336,17 @@ export default function Home() {
   });
   const cardOpacity = useTransform(aboutProgress, [0, 0.12], [0, 1]);
   const cardY = useTransform(aboutProgress, [0, 0.12], [28, 0]);
-  const photosOpacity = useTransform(aboutProgress, [0.15, 0.28], [0, 1]);
-  const photosY = useTransform(aboutProgress, [0.15, 0.28], [28, 0]);
+  // Per-photo scroll reveals: back-left → back-center → back-right → front
+  const photoOpacity1 = useTransform(aboutProgress, [0.15, 0.22], [0, 1]);
+  const photoY1      = useTransform(aboutProgress, [0.15, 0.22], [20, 0]);
+  const photoOpacity2 = useTransform(aboutProgress, [0.20, 0.27], [0, 1]);
+  const photoY2      = useTransform(aboutProgress, [0.20, 0.27], [20, 0]);
+  const photoOpacity3 = useTransform(aboutProgress, [0.25, 0.32], [0, 1]);
+  const photoY3      = useTransform(aboutProgress, [0.25, 0.32], [20, 0]);
+  const photoOpacity0 = useTransform(aboutProgress, [0.30, 0.37], [0, 1]);
+  const photoY0      = useTransform(aboutProgress, [0.30, 0.37], [20, 0]);
+  const photoOpacities = [photoOpacity0, photoOpacity1, photoOpacity2, photoOpacity3];
+  const photoScrollYs  = [photoY0, photoY1, photoY2, photoY3];
   const lineOpacity = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
   const lineScaleY = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
   const ufOpacity = useTransform(aboutProgress, [0.38, 0.52], [0, 1]);
@@ -213,6 +363,14 @@ export default function Home() {
   });
   const skillsTitleOpacity = useTransform(skillsProgress, [0, 0.12], [0, 1]);
   const skillsTitleY = useTransform(skillsProgress, [0, 0.12], [20, 0]);
+
+  // Projects: sticky scroll-reveal
+  const { scrollYProgress: projectsProgress } = useScroll({
+    target: projectsSectionRef,
+    offset: ["start start", "end end"],
+  });
+  const projectsTitleOpacity = useTransform(projectsProgress, [0, 0.10], [0, 1]);
+  const projectsTitleY = useTransform(projectsProgress, [0, 0.10], [20, 0]);
 
   const [slotImages, setSlotImages] = useState<Array<'one' | 'two' | 'three' | 'four'>>([
     'one',   // front
@@ -295,7 +453,7 @@ export default function Home() {
     const sectionHeight = el.offsetHeight;
     const viewportHeight = window.innerHeight;
     // Sticky scroll-reveal sections: scroll to end so content is fully revealed
-    const isStickyReveal = id === "about" || id === "skills";
+    const isStickyReveal = id === "about" || id === "skills" || id === "projects";
     const targetScrollY = id === "home"
       ? 0
       : isStickyReveal
@@ -441,10 +599,7 @@ export default function Home() {
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="max-w-6xl w-full grid gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] items-center">
           {/* Photo stack of four — left column, scroll-driven reveal */}
-          <motion.div
-            style={{ opacity: photosOpacity, y: photosY }}
-            className="relative -ml-4 md:-ml-20 flex justify-start"
-          >
+          <div className="relative -ml-4 md:-ml-20 flex justify-start">
             <div className="relative w-full max-w-md aspect-[4/5]">
               {slotImages.map((imageKey, slotIndex) => {
                 const isFront = slotIndex === 0;
@@ -474,75 +629,85 @@ export default function Home() {
                   });
                 };
 
-                const commonProps = {
-                  animate: { scale, x, y, rotate, opacity: 1 },
-                  whileHover: hover,
-                  transition: {
-                    stiffness: 230,
-                    damping: 26,
-                    delay: 0.06 * slotIndex,
-                  },
-                  style: { zIndex: zIndexBySlot[slotIndex] },
-                  className:
-                    "absolute top-1/2 left-1/2 w-[82%] aspect-[4/5] -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden border border-white/20 bg-black/25 shadow-[0_22px_80px_rgba(15,23,42,0.85)] cursor-pointer",
-                  onClick: handleClick,
-                };
-
                 return (
-                  <motion.div key={`slot-${slotIndex}`} {...commonProps}>
+                  <motion.div
+                    key={`reveal-${slotIndex}`}
+                    style={{
+                      opacity: photoOpacities[slotIndex],
+                      y: photoScrollYs[slotIndex],
+                      position: "absolute",
+                      inset: 0,
+                      zIndex: zIndexBySlot[slotIndex],
+                      overflow: "visible",
+                    }}
+                  >
                     <motion.div
-                      key={imageKey}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="w-full h-full"
+                      key={`slot-${slotIndex}`}
+                      animate={{ scale, x, y, rotate }}
+                      whileHover={hover}
+                      transition={{
+                        type: "spring",
+                        stiffness: 230,
+                        damping: 26,
+                        delay: 0.06 * slotIndex,
+                      }}
+                      className="absolute top-1/2 left-1/2 w-[82%] aspect-[4/5] -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden border border-white/20 bg-black/25 shadow-[0_22px_80px_rgba(15,23,42,0.85)] cursor-pointer"
+                      onClick={handleClick}
                     >
-                      {imageKey === 'one' && (
-                        <Image
-                          src="/images/jaedon1.jpg"
-                          alt="Jaedon main portrait"
-                          fill
-                          className="object-cover"
-                          sizes="(min-width: 1024px) 320px, 70vw"
-                          priority={false}
-                        />
-                      )}
-                      {imageKey === 'two' && (
-                        <Image
-                          src="/images/jaedon2.jpeg"
-                          alt="Jaedon speaking"
-                          fill
-                          className="object-cover"
-                          sizes="(min-width: 1024px) 300px, 65vw"
-                          priority={false}
-                        />
-                      )}
-                      {imageKey === 'three' && (
-                        <Image
-                          src="/images/jaedon3.jpeg"
-                          alt="Jaedon portrait 2"
-                          fill
-                          className="object-cover"
-                          sizes="(min-width: 1024px) 280px, 65vw"
-                          priority={false}
-                        />
-                      )}
-                      {imageKey === 'four' && (
-                        <Image
-                          src="/images/jaedon4.jpeg"
-                          alt="Jaedon candid"
-                          fill
-                          className="object-cover"
-                          sizes="(min-width: 1024px) 280px, 65vw"
-                          priority={false}
-                        />
-                      )}
+                      <motion.div
+                        key={imageKey}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        className="w-full h-full"
+                      >
+                        {imageKey === 'one' && (
+                          <Image
+                            src="/images/jaedon1.jpg"
+                            alt="Jaedon main portrait"
+                            fill
+                            className="object-cover"
+                            sizes="(min-width: 1024px) 320px, 70vw"
+                            priority={false}
+                          />
+                        )}
+                        {imageKey === 'two' && (
+                          <Image
+                            src="/images/jaedon2.jpeg"
+                            alt="Jaedon speaking"
+                            fill
+                            className="object-cover"
+                            sizes="(min-width: 1024px) 300px, 65vw"
+                            priority={false}
+                          />
+                        )}
+                        {imageKey === 'three' && (
+                          <Image
+                            src="/images/jaedon3.jpeg"
+                            alt="Jaedon portrait 2"
+                            fill
+                            className="object-cover"
+                            sizes="(min-width: 1024px) 280px, 65vw"
+                            priority={false}
+                          />
+                        )}
+                        {imageKey === 'four' && (
+                          <Image
+                            src="/images/jaedon4.jpeg"
+                            alt="Jaedon candid"
+                            fill
+                            className="object-cover"
+                            sizes="(min-width: 1024px) 280px, 65vw"
+                            priority={false}
+                          />
+                        )}
+                      </motion.div>
                     </motion.div>
                   </motion.div>
                 );
               })}
             </div>
-          </motion.div>
+          </div>
 
           {/* Right column: card + timeline — scroll-driven (Lenis) so they appear as section lands */}
           <motion.div
@@ -670,12 +835,14 @@ export default function Home() {
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="max-w-3xl w-full">
-            <motion.h2
+            <motion.div
               style={{ opacity: skillsTitleOpacity, y: skillsTitleY }}
-              className="text-3xl font-bold text-white mb-8 text-center drop-shadow-lg"
+              className="flex justify-center mb-10"
             >
-              My Skills
-            </motion.h2>
+              <div className="px-7 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
+                <h2 className="text-2xl font-bold text-white">My Skills</h2>
+              </div>
+            </motion.div>
             <div className="flex flex-col gap-6">
               {SKILL_CATEGORIES.map(({ label, skills }, catIdx) => {
                 const startIndex = SKILL_CATEGORIES.slice(0, catIdx).reduce((sum, c) => sum + c.skills.length, 0);
@@ -695,33 +862,35 @@ export default function Home() {
       </div>
 
       {/* Projects Section */}
-      <ScrollSection id="projects">
-        <div className="max-w-4xl w-full">
-          <h2 className="text-3xl font-bold text-white mb-12 text-center drop-shadow-lg">
-            My Projects
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-              <h3 className="text-xl font-bold text-white mb-4">Project One</h3>
-              <p className="text-white/90 mb-4">
-                A beautiful web application built with React and modern design principles.
-              </p>
-              <button className="px-4 py-2 text-sm bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all">
-                View Project
-              </button>
-            </div>
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-              <h3 className="text-xl font-bold text-white mb-4">Project Two</h3>
-              <p className="text-white/90 mb-4">
-                An innovative solution combining cutting-edge technology with user-centered design.
-              </p>
-              <button className="px-4 py-2 text-sm bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all">
-                View Project
-              </button>
+      <div
+        id="projects"
+        ref={projectsSectionRef}
+        className="relative"
+        style={{ height: "450vh" }}
+      >
+        <div className="sticky top-0 h-screen flex items-center justify-center p-5">
+          <div className="max-w-5xl w-full">
+            <motion.div
+              style={{ opacity: projectsTitleOpacity, y: projectsTitleY }}
+              className="flex justify-center mb-10"
+            >
+              <div className="px-7 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
+                <h2 className="text-2xl font-bold text-white">My Projects</h2>
+              </div>
+            </motion.div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {PROJECTS.map((project, i) => (
+                <ProjectCard
+                  key={project.name}
+                  {...project}
+                  index={i}
+                  scrollProgress={projectsProgress}
+                />
+              ))}
             </div>
           </div>
         </div>
-      </ScrollSection>
+      </div>
 
       {/* Contact Section */}
       <ScrollSection id="contact">
