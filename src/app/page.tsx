@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { motion, useScroll, useTransform, useMotionValue, animate, type MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useMotionValueEvent, animate, type MotionValue } from "framer-motion";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
@@ -257,16 +257,13 @@ function ProjectCard({
   tech,
   github,
   index,
-  scrollProgress,
-}: Project & { index: number; scrollProgress: MotionValue<number> }) {
-  const total = PROJECTS.length;
-  const start = 0.10 + (index / total) * 0.55;
-  const end = start + (1 / total) * 0.55;
-  const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollProgress, [start, end], [24, 0]);
+  visible,
+}: Project & { index: number; visible: boolean }) {
   return (
     <motion.div
-      style={{ opacity, y }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+      transition={{ duration: 0.4, delay: visible ? index * 0.07 : (PROJECTS.length - 1 - index) * 0.07, ease: "easeOut" }}
       className="p-5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col gap-3 min-h-[140px]"
     >
       <div>
@@ -349,12 +346,10 @@ export default function Home() {
   const photoScrollYs  = [photoY0, photoY1, photoY2, photoY3];
   const lineOpacity = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
   const lineScaleY = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
-  const ufOpacity = useTransform(aboutProgress, [0.38, 0.52], [0, 1]);
-  const ufX = useTransform(aboutProgress, [0.38, 0.52], [-20, 0]);
-  const baronOpacity = useTransform(aboutProgress, [0.50, 0.64], [0, 1]);
-  const baronX = useTransform(aboutProgress, [0.50, 0.64], [-20, 0]);
-  const datadogOpacity = useTransform(aboutProgress, [0.62, 0.76], [0, 1]);
-  const datadogX = useTransform(aboutProgress, [0.62, 0.76], [-20, 0]);
+  const [timelineVisible, setTimelineVisible] = useState(false);
+  useMotionValueEvent(aboutProgress, "change", (v) => {
+    setTimelineVisible(v > 0.38);
+  });
 
   // Skills: sticky scroll-reveal (Apple-style) – section "stops" and items pop in as you scroll
   const { scrollYProgress: skillsProgress } = useScroll({
@@ -364,13 +359,17 @@ export default function Home() {
   const skillsTitleOpacity = useTransform(skillsProgress, [0, 0.12], [0, 1]);
   const skillsTitleY = useTransform(skillsProgress, [0, 0.12], [20, 0]);
 
-  // Projects: sticky scroll-reveal
+  // Projects: sticky scroll — cards cascade in once user scrolls ~20% into section
   const { scrollYProgress: projectsProgress } = useScroll({
     target: projectsSectionRef,
     offset: ["start start", "end end"],
   });
-  const projectsTitleOpacity = useTransform(projectsProgress, [0, 0.10], [0, 1]);
-  const projectsTitleY = useTransform(projectsProgress, [0, 0.10], [20, 0]);
+  const projectsTitleOpacity = useTransform(projectsProgress, [0, 0.12], [0, 1]);
+  const projectsTitleY = useTransform(projectsProgress, [0, 0.12], [20, 0]);
+  const [projectsVisible, setProjectsVisible] = useState(false);
+  useMotionValueEvent(projectsProgress, "change", (v) => {
+    setProjectsVisible(v > 0.35);
+  });
 
   const [slotImages, setSlotImages] = useState<Array<'one' | 'two' | 'three' | 'four'>>([
     'one',   // front
@@ -639,6 +638,7 @@ export default function Home() {
                       inset: 0,
                       zIndex: zIndexBySlot[slotIndex],
                       overflow: "visible",
+                      pointerEvents: "none",
                     }}
                   >
                     <motion.div
@@ -652,6 +652,7 @@ export default function Home() {
                         delay: 0.06 * slotIndex,
                       }}
                       className="absolute top-1/2 left-1/2 w-[82%] aspect-[4/5] -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden border border-white/20 bg-black/25 shadow-[0_22px_80px_rgba(15,23,42,0.85)] cursor-pointer"
+                      style={{ pointerEvents: "auto" }}
                       onClick={handleClick}
                     >
                       <motion.div
@@ -746,7 +747,9 @@ export default function Home() {
 
                 {/* UF */}
                 <motion.div
-                  style={{ opacity: ufOpacity, x: ufX }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, delay: timelineVisible ? 0 : 0.24, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4 group"
                 >
                   <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
@@ -772,7 +775,9 @@ export default function Home() {
 
                 {/* Baron */}
                 <motion.div
-                  style={{ opacity: baronOpacity, x: baronX }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4 group"
                 >
                   <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
@@ -805,7 +810,9 @@ export default function Home() {
 
                 {/* Datadog */}
                 <motion.div
-                  style={{ opacity: datadogOpacity, x: datadogX }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, delay: timelineVisible ? 0.24 : 0, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4 group"
                 >
                   <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)] p-1.5">
@@ -866,7 +873,7 @@ export default function Home() {
         id="projects"
         ref={projectsSectionRef}
         className="relative"
-        style={{ height: "450vh" }}
+        style={{ height: "400vh" }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="max-w-5xl w-full">
@@ -884,7 +891,7 @@ export default function Home() {
                   key={project.name}
                   {...project}
                   index={i}
-                  scrollProgress={projectsProgress}
+                  visible={projectsVisible}
                 />
               ))}
             </div>
