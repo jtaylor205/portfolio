@@ -150,7 +150,7 @@ function SkillCategory({
         <span className="text-[10px] uppercase tracking-[0.18em] text-white/40 font-semibold whitespace-nowrap">
           {label}
         </span>
-        <div className="flex-1 h-px bg-white/10" />
+        <div className="flex-1 h-px bg-gradient-to-r from-white/20 to-transparent" />
       </motion.div>
       <div className="flex flex-wrap gap-2">
         {skills.map((skill, i) => (
@@ -763,20 +763,15 @@ export default function Home() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                   transition={{ duration: 0.4, delay: timelineVisible ? 0 : 0.24, ease: "easeOut" }}
-                  className="relative z-10 flex flex-row items-center gap-4 group"
+                  className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-                    {/* Default: UF block in white (mask) */}
-                    <span className="absolute inset-0 flex items-center justify-center text-white transition-opacity duration-200 group-hover:opacity-0">
-                      <span className="block w-10 h-10 bg-current [mask-image:url('/images/uf-block.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
-                    </span>
-                    {/* Hover: original blue UF SVG */}
+                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src="/images/uf-block.svg"
                       alt="University of Florida"
                       width={48}
                       height={48}
-                      className="absolute inset-0 w-10 h-10 object-contain m-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none"
+                      className="w-10 h-10 object-contain"
                       sizes="56px"
                     />
                   </div>
@@ -791,27 +786,15 @@ export default function Home() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                   transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
-                  className="relative z-10 flex flex-row items-center gap-4 group"
+                  className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)]">
-                    {/* Default: isometric Rubik's cube (SVG you provided) */}
-                    <span className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-hover:opacity-0">
-                      <Image
-                        src="/images/rubiks-cube-isometric.svg"
-                        alt=""
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 object-contain"
-                        sizes="40px"
-                      />
-                    </span>
-                    {/* Hover: Baron logo (filled SVG) */}
+                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src="/images/baron.svg"
                       alt="Baron Technologies"
                       width={48}
                       height={48}
-                      className="absolute inset-0 w-10 h-10 object-contain m-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none"
+                      className="w-10 h-10 object-contain"
                       sizes="56px"
                     />
                   </div>
@@ -826,10 +809,10 @@ export default function Home() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                   transition={{ duration: 0.4, delay: timelineVisible ? 0.24 : 0, ease: "easeOut" }}
-                  className="relative z-10 flex flex-row items-center gap-4 group"
+                  className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden transition-all duration-200 group-hover:bg-white/30 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.16)] p-1.5">
-                    <span className="block w-full h-full text-white/90 transition-colors duration-200 group-hover:text-[#774AA4]">
+                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+                    <span className="block w-full h-full text-[#774AA4]">
                       <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
                     </span>
                   </div>
@@ -921,9 +904,27 @@ export default function Home() {
           <p className="text-white/90 text-lg mb-8 leading-relaxed">
             Ready to work together? Let&apos;s create something amazing!
           </p>
-          <button className="px-6 py-3 text-base bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all">
-            Contact Me
-          </button>
+          <div className="flex items-center justify-center gap-3">
+            <a
+              href="mailto:jtaylor205@ufl.edu"
+              className="px-6 py-3 text-base bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all"
+            >
+              Contact Me
+            </a>
+            <a
+              href="/resume.pdf"
+              download="JaedonTaylor_Resume.pdf"
+              className="flex items-center gap-2 px-6 py-3 text-base bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="8" y1="17" x2="16" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Resume
+            </a>
+          </div>
         </div>
       </ScrollSection>
       </motion.div>

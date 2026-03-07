@@ -9,7 +9,7 @@ export default function SocialButtons() {
           window.open('https://github.com/jtaylor205', '_blank');
         }}
         icon={
-          <span className="block text-gray-700 transition-colors duration-300 group-hover:text-black">
+          <span className="block text-white/90 transition-colors duration-300 group-hover:text-black">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 fillRule="evenodd"
@@ -28,7 +28,7 @@ export default function SocialButtons() {
           window.open('https://www.linkedin.com/in/jaedon-taylor/', '_blank');
         }}
         icon={
-          <span className="block overflow-hidden rounded-[0.4em] text-gray-700 transition-colors duration-300 group-hover:text-[#0A66C2]">
+          <span className="block overflow-hidden rounded-[0.4em] text-white/90 transition-colors duration-300 group-hover:text-[#0A66C2]">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
                 d="M20.447 20.452H16.893V14.883C16.893 13.555 16.866 11.846 15.041 11.846C13.188 11.846 12.905 13.291 12.905 14.785V20.452H9.351V9H12.765V10.561H12.811C13.288 9.661 14.448 8.711 16.181 8.711C19.782 8.711 20.448 11.081 20.448 14.166V20.452H20.447ZM5.337 7.433C4.193 7.433 3.274 6.507 3.274 5.368C3.274 4.23 4.194 3.305 5.337 3.305C6.477 3.305 7.401 4.23 7.401 5.368C7.401 6.507 6.476 7.433 5.337 7.433ZM7.119 20.452H3.555V9H7.119V20.452ZM22.225 0H1.771C0.792 0 0 0.774 0 1.729V22.271C0 23.227 0.792 24 1.771 24H22.222C23.2 24 24 23.227 24 22.271V1.729C24 0.774 23.2 0 22.222 0H22.225Z"
@@ -36,6 +36,26 @@ export default function SocialButtons() {
               />
             </svg>
             </span>
+        }
+      />
+
+      {/* Resume Button */}
+      <GlassButton
+        onClick={() => {
+          const link = document.createElement('a');
+          link.href = '/resume.pdf';
+          link.download = 'JaedonTaylor_Resume.pdf';
+          link.click();
+        }}
+        icon={
+          <span className="block text-white/90 transition-colors duration-300 group-hover:text-[#FA4616]">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="8" y1="17" x2="16" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </span>
         }
       />
     </div>
