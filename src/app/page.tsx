@@ -169,6 +169,8 @@ function SkillCategory({
 type Project = {
   name: string;
   category: string;
+  description: string;
+  accent: string;
   tech: { name: string; slug: string }[];
   github?: string;
 };
@@ -177,6 +179,8 @@ const PROJECTS: Project[] = [
   {
     name: "HTTP Capture & Replay",
     category: "Developer Tools",
+    description: "A local reverse proxy that intercepts HTTP(S) traffic, redacts sensitive data at capture time, and replays full multi-request sessions via a web UI.",
+    accent: "linear-gradient(90deg, #38bdf8, #6366f1)",
     tech: [
       { name: "Go", slug: "go" },
       { name: "Next.js", slug: "nextdotjs" },
@@ -187,6 +191,8 @@ const PROJECTS: Project[] = [
   {
     name: "Solace",
     category: "Mobile App / AI",
+    description: "An AI-powered wellness companion that delivers personalized mental health support, mood tracking, and guided exercises using Google Gemini.",
+    accent: "linear-gradient(90deg, #a855f7, #ec4899)",
     tech: [
       { name: "React Native", slug: "react" },
       { name: "JavaScript", slug: "javascript" },
@@ -196,16 +202,10 @@ const PROJECTS: Project[] = [
     github: "#",
   },
   {
-    name: "Minesweeper",
-    category: "Game Development",
-    tech: [
-      { name: "C++", slug: "cplusplus" },
-    ],
-    github: "#",
-  },
-  {
     name: "Food Fridge",
     category: "Mobile App",
+    description: "An iOS app that tracks fridge inventory, flags expiring items, and suggests recipes based on what you already have.",
+    accent: "linear-gradient(90deg, #22c55e, #14b8a6)",
     tech: [
       { name: "Swift", slug: "swift" },
       { name: "Firebase", slug: "firebase" },
@@ -215,6 +215,8 @@ const PROJECTS: Project[] = [
   {
     name: "Phone Guru",
     category: "Web Development / AI",
+    description: "An AI web tool that recommends the right smartphone for any user through a conversational interface powered by OpenAI.",
+    accent: "linear-gradient(90deg, #f97316, #eab308)",
     tech: [
       { name: "Python", slug: "python" },
       { name: "HTML", slug: "html5" },
@@ -225,16 +227,10 @@ const PROJECTS: Project[] = [
     github: "#",
   },
   {
-    name: "Sudoku Generator",
-    category: "Game Development",
-    tech: [
-      { name: "Python", slug: "python" },
-    ],
-    github: "#",
-  },
-  {
     name: "File System",
     category: "Operating Systems",
+    description: "A Unix-style file system built from scratch in C, supporting hierarchical directories, file permissions, and persistent on-disk storage.",
+    accent: "linear-gradient(90deg, #ef4444, #f97316)",
     tech: [
       { name: "C", slug: "c" },
       { name: "C++", slug: "cplusplus" },
@@ -243,8 +239,10 @@ const PROJECTS: Project[] = [
     github: "#",
   },
   {
-    name: "Stock Market Trading Analyzer",
+    name: "Stock Market Analyzer",
     category: "Data Analysis",
+    description: "A Python tool that processes historical market data to surface trends, correlations, and potential trading signals across multiple tickers.",
+    accent: "linear-gradient(90deg, #eab308, #84cc16)",
     tech: [
       { name: "Python", slug: "python" },
     ],
@@ -254,6 +252,8 @@ const PROJECTS: Project[] = [
 function ProjectCard({
   name,
   category,
+  description,
+  accent,
   tech,
   github,
   index,
@@ -264,41 +264,49 @@ function ProjectCard({
       initial={{ opacity: 0, y: 24 }}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.4, delay: visible ? index * 0.07 : (PROJECTS.length - 1 - index) * 0.07, ease: "easeOut" }}
-      className="p-5 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col gap-3 min-h-[140px]"
+      className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden min-h-[220px]"
     >
-      <div>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{category}</p>
-        <h3 className="text-base font-bold text-white leading-snug">{name}</h3>
-      </div>
-      <div className="flex flex-wrap gap-1.5 flex-1 items-start">
-        {tech.map(({ slug, name: techName }) => (
-          <div
-            key={slug}
-            className="w-9 h-9 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center"
+      {/* Accent bar */}
+      <div className="h-1 w-full shrink-0" style={{ background: accent }} />
+
+      <div className="p-7 flex flex-col gap-3 flex-1">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{category}</p>
+          <h3 className="text-lg font-bold text-white leading-snug mb-2">{name}</h3>
+          <p className="text-sm text-white/60 leading-relaxed">{description}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+          {tech.map(({ slug, name: techName }) => (
+            <div
+              key={slug}
+              className="w-9 h-9 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://cdn.simpleicons.org/${slug}/ffffff`}
+                alt={techName}
+                className="w-5 h-5 object-contain"
+                loading="lazy"
+                onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {github && (
+          <a
+            href={github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-[11px] text-white/70 hover:bg-white/20 hover:text-white transition-colors"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`https://cdn.simpleicons.org/${slug}/ffffff`}
-              alt={techName}
-              className="w-5 h-5 object-contain"
-              loading="lazy"
-              onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
-            />
-          </div>
-        ))}
+            <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-3.5 h-3.5 object-contain" loading="lazy" />
+            GitHub
+          </a>
+        )}
       </div>
-      {github && (
-        <a
-          href={github}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-[11px] text-white/70 hover:bg-white/20 hover:text-white transition-colors"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-3.5 h-3.5 object-contain" loading="lazy" />
-          GitHub
-        </a>
-      )}
     </motion.div>
   );
 }
@@ -383,13 +391,14 @@ export default function Home() {
     const updateActiveFromScroll = () => {
       const viewportCenter = window.scrollY + window.innerHeight / 2;
       let active: string | null = null;
-      for (let i = 0; i < SECTIONS.length; i++) {
-        const el = document.getElementById(SECTIONS[i].id);
+      const allIds = [...SECTIONS.map(s => s.id), 'projects'];
+      for (const id of allIds) {
+        const el = document.getElementById(id);
         if (!el) continue;
         const top = el.getBoundingClientRect().top + window.scrollY;
         const height = el.offsetHeight;
         if (viewportCenter >= top && viewportCenter < top + height) {
-          active = SECTIONS[i].id;
+          active = id === 'projects' ? 'skills' : id;
         }
       }
       if (active !== null) setActiveId(active);
@@ -885,7 +894,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold text-white">My Projects</h2>
               </div>
             </motion.div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
               {PROJECTS.map((project, i) => (
                 <ProjectCard
                   key={project.name}
