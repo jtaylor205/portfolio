@@ -187,6 +187,7 @@ const PROJECTS: Project[] = [
       { name: "TypeScript", slug: "typescript" },
       { name: "SQLite", slug: "sqlite" },
     ],
+    github: "https://github.com/alexfisher03/shigawire-dev",
   },
   {
     name: "Solace",
@@ -199,7 +200,20 @@ const PROJECTS: Project[] = [
       { name: "Firebase", slug: "firebase" },
       { name: "Gemini", slug: "googlegemini" },
     ],
-    github: "#",
+    github: "https://github.com/jtaylor205/Solace",
+  },
+  {
+    name: "Interview Coach",
+    category: "Web Development / AI",
+    description: "A LeetCode-style platform for behavioral interview prep — record yourself answering questions, get AI feedback on your responses, and build structured answer outlines.",
+    accent: "linear-gradient(90deg, #6366f1, #a855f7)",
+    tech: [
+      { name: "React", slug: "react" },
+      { name: "TypeScript", slug: "typescript" },
+      { name: "Vite", slug: "vite" },
+      { name: "Tailwind CSS", slug: "tailwindcss" },
+    ],
+    github: "https://github.com/jtaylor205/interview-practice",
   },
   {
     name: "Food Fridge",
@@ -210,7 +224,7 @@ const PROJECTS: Project[] = [
       { name: "Swift", slug: "swift" },
       { name: "Firebase", slug: "firebase" },
     ],
-    github: "#",
+    github: "https://github.com/jtaylor205/food-fridge",
   },
   {
     name: "Phone Guru",
@@ -224,27 +238,17 @@ const PROJECTS: Project[] = [
       { name: "JavaScript", slug: "javascript" },
       { name: "OpenAI", slug: "chatgpt" },
     ],
-    github: "#",
+    github: "https://github.com/jtaylor205/Phone-Guru",
   },
   {
     name: "File System",
     category: "Operating Systems",
-    description: "A Unix-style file system built from scratch in C, supporting hierarchical directories, file permissions, and persistent on-disk storage.",
+    description: "A userspace filesystem daemon using the FUSE API, designed to read from and write to WAD files. Also utilizes a C++ library for parsing and manipulating WAD file headers, descriptors, and lump data.",
     accent: "linear-gradient(90deg, #ef4444, #f97316)",
     tech: [
       { name: "C", slug: "c" },
       { name: "C++", slug: "cplusplus" },
       { name: "Linux", slug: "linux" },
-    ],
-    github: "#",
-  },
-  {
-    name: "Stock Market Analyzer",
-    category: "Data Analysis",
-    description: "A Python tool that processes historical market data to surface trends, correlations, and potential trading signals across multiple tickers.",
-    accent: "linear-gradient(90deg, #eab308, #84cc16)",
-    tech: [
-      { name: "Python", slug: "python" },
     ],
   },
 ];
