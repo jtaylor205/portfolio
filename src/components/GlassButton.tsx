@@ -12,40 +12,60 @@ export default function GlassButton({ children, onClick, className = "", icon }:
   return (
     <motion.button
       className={`
-        group relative w-16 h-16 rounded-2xl cursor-pointer
-        bg-white/20 backdrop-blur-xl
-        border border-white/30
-        shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)]
+        group relative z-0 w-16 h-16 rounded-2xl cursor-pointer
         flex items-center justify-center
-        transition-[background-color,box-shadow] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
-        hover:bg-white/30 
-        hover:shadow-[0_12px_40px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.3)]
+        hover:bg-white/[0.05] transition-colors duration-200
         active:scale-95
         ${className}
       `}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      whileHover={{ 
+      whileHover={{
         scale: 1.05,
         y: -2,
-        transition: { 
+        transition: {
           type: "tween",
-          duration: 0.3, 
+          duration: 0.3,
           ease: [0.4, 0, 0.2, 1]
         }
       }}
-      whileTap={{ 
+      whileTap={{
         scale: 0.95,
         y: 0,
         transition: { duration: 0.1 }
       }}
       onClick={onClick}
     >
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/30 via-white/10 to-transparent opacity-60" />
-      
+      {/* Frosted glass background */}
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: -1,
+          borderRadius: 'inherit',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          background: 'rgba(255,255,255,0.10)',
+          pointerEvents: 'none',
+        }}
+      />
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: -1,
+          borderRadius: 'inherit',
+          border: '1px solid rgba(255,255,255,0.22)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.28), 0 8px 32px rgba(0,0,0,0.12)',
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-center">
+      <div className="relative flex items-center justify-center">
         {icon || (
           // Default home icon like in the image
           <svg 

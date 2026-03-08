@@ -86,11 +86,34 @@ export default function GlassNavBar({ activeId, onSelect }: GlassNavBarProps) {
     <nav
       ref={navRef}
       className="fixed top-6 left-1/2 z-50 -translate-x-1/2
-        flex items-center gap-1 p-1.5 rounded-4xl
-        bg-white/20 backdrop-blur-xl
-        border border-white/30
-        shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)]"
+        flex items-center gap-1 p-1.5 rounded-4xl"
     >
+      {/* Frosted glass background */}
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: -1,
+          borderRadius: 'inherit',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          background: 'rgba(255,255,255,0.10)',
+          pointerEvents: 'none',
+        }}
+      />
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: -1,
+          borderRadius: 'inherit',
+          border: '1px solid rgba(255,255,255,0.20)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.28)',
+          pointerEvents: 'none',
+        }}
+      />
       <div
         ref={(el) => {
           pillContainerRef.current = el;

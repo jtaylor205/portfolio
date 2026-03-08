@@ -7,7 +7,8 @@ import { useLenis } from "@/hooks/useLenis";
 import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
 import SocialButtons from "@/components/SocialButtons";
 import AuroraBackground from "@/components/background/AuroraBackground";
-import { TextShimmer } from "@/components/ui/TextShimmer";
+import { FlipText } from "@/components/ui/FlipText";
+import { GlassEffect, GlassFilter } from "@/components/ui/GlassEffect";
 
 type ScrollSectionProps = {
   id: string;
@@ -107,25 +108,22 @@ function SkillPill({
   const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
   const y = useTransform(scrollProgress, [start, end], [16, 0]);
   return (
-    <motion.div
-      style={{ opacity, y }}
-      whileHover={{ backgroundColor: "rgba(255,255,255,0.18)" }}
-      transition={{ duration: 0.15 }}
-      className="flex flex-col items-center gap-2 pt-3 pb-2.5 px-3 rounded-xl bg-white/10 backdrop-blur-xl border border-white/15 shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-[76px] cursor-default"
-    >
-      {imgError ? (
-        <span className="h-9 flex items-center text-white/70 text-[10px] font-bold uppercase tracking-wide text-center leading-tight">{name}</span>
-      ) : (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-          src={imgSrc}
-          alt={name}
-          className={`w-9 h-9 object-contain${localSrc ? " brightness-0 invert" : ""}`}
-          loading="lazy"
-          onError={() => setImgError(true)}
-        />
-      )}
-      <span className="text-white/75 text-[11px] font-medium text-center leading-tight">{name}</span>
+    <motion.div style={{ opacity, y }}>
+      <GlassEffect className="flex flex-col items-center gap-2 pt-3 pb-2.5 px-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-[76px] cursor-default hover:bg-white/[0.05] transition-colors">
+        {imgError ? (
+          <span className="h-9 flex items-center text-white/70 text-[10px] font-bold uppercase tracking-wide text-center leading-tight">{name}</span>
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={imgSrc}
+            alt={name}
+            className={`w-9 h-9 object-contain${localSrc ? " brightness-0 invert" : ""}`}
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+        )}
+        <span className="text-white/75 text-[11px] font-medium text-center leading-tight">{name}</span>
+      </GlassEffect>
     </motion.div>
   );
 }
@@ -269,8 +267,8 @@ function ProjectCard({
       initial={{ opacity: 0, y: 24 }}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.4, delay: visible ? index * 0.07 : (PROJECTS.length - 1 - index) * 0.07, ease: "easeOut" }}
-      className="rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden min-h-[220px]"
     >
+      <GlassEffect className="rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden min-h-[220px]">
       {/* Accent bar */}
       <div className="h-1 w-full shrink-0" style={{ background: accent }} />
 
@@ -283,9 +281,9 @@ function ProjectCard({
 
         <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
           {tech.map(({ slug, name: techName }) => (
-            <div
+            <GlassEffect
               key={slug}
-              className="w-9 h-9 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center"
+              className="w-9 h-9 rounded-lg flex items-center justify-center"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -295,23 +293,25 @@ function ProjectCard({
                 loading="lazy"
                 onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
               />
-            </div>
+            </GlassEffect>
           ))}
         </div>
 
         {github && (
-          <a
+          <GlassEffect
+            as="a"
             href={github}
             target="_blank"
             rel="noopener noreferrer"
-            className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/15 text-[11px] text-white/70 hover:bg-white/20 hover:text-white transition-colors"
+            className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-3.5 h-3.5 object-contain" loading="lazy" />
             GitHub
-          </a>
+          </GlassEffect>
         )}
       </div>
+      </GlassEffect>
     </motion.div>
   );
 }
@@ -491,6 +491,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen">
+      <GlassFilter />
       <AuroraBackground />
       <GlassNavBar activeId={activeId} onSelect={handleNavSelect} />
       <SocialButtons />
@@ -504,33 +505,34 @@ export default function Home() {
       >
         <div className="relative sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="flex flex-col items-center gap-6 text-center">
-            {/* Name – mounts on load */}
-            <motion.h1
-              className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
-              style={{
-                fontFamily: 'var(--font-monument-wide), var(--font-poppins), system-ui',
-              }}
-              initial={{ opacity: 0, y: 40, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.9, ease: "easeOut" }}
+            {/* Name – flip-in on load */}
+            <h1
+              className="flex gap-6 sm:gap-8 md:gap-10"
+              style={{ fontFamily: 'var(--font-monument-wide), var(--font-poppins), system-ui' }}
             >
-              Jaedon&nbsp;Taylor
-            </motion.h1>
+              <FlipText
+                word="Jaedon"
+                className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+              />
+              <FlipText
+                word="Taylor"
+                startDelay={0.6}
+                className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+              />
+            </h1>
 
             {/* Glassy subtitle chips – scroll-driven reveal */}
             <div className="flex flex-col items-center gap-3">
-              <motion.div
-                className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
-                style={{ opacity: chip1Opacity, y: chip1Y }}
-              >
-                University of Florida Student
+              <motion.div style={{ opacity: chip1Opacity, y: chip1Y }}>
+                <GlassEffect className="px-5 py-2 rounded-full text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                  University of Florida Student
+                </GlassEffect>
               </motion.div>
 
-              <motion.div
-                className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/25 text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
-                style={{ opacity: chip2Opacity, y: chip2Y }}
-              >
-                Incoming Software Engineer @ Datadog
+              <motion.div style={{ opacity: chip2Opacity, y: chip2Y }}>
+                <GlassEffect className="px-5 py-2 rounded-full text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                  Incoming Software Engineer @ Datadog
+                </GlassEffect>
               </motion.div>
             </div>
           </div>
@@ -730,7 +732,7 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-[minmax(38rem,1fr)_auto] gap-8 md:gap-10 min-w-0 w-full md:pl-16"
           >
             {/* Copy card — height drives timeline column */}
-            <div className="relative z-50 w-full max-w-xl lg:max-w-3xl p-6 md:p-9 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
+            <GlassEffect className="relative z-50 w-full max-w-xl lg:max-w-3xl p-6 md:p-9 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
               <p className="text-xs md:text-sm uppercase tracking-[0.26em] text-white/60 mb-4">
                 Hello, I&apos;m Jaedon
               </p>
@@ -743,7 +745,7 @@ export default function Home() {
                 to hold up when things get complicated. I&apos;ve worked across the stack and pick up whatever
                 the problem needs. I care about writing code that&apos;s correct, fast, and built to last.
               </p>
-            </div>
+            </GlassEffect>
 
             {/* Timeline: line from UF to Datadog only; items revealed by scroll progress */}
             <div className="w-full max-w-sm h-full">
@@ -766,7 +768,7 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: timelineVisible ? 0 : 0.24, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center shrink-0 overflow-hidden">
+                  <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src="/images/uf-block.svg"
                       alt="University of Florida"
@@ -775,7 +777,7 @@ export default function Home() {
                       className="w-10 h-10 object-contain"
                       sizes="56px"
                     />
-                  </div>
+                  </GlassEffect>
                   <div>
                     <p className="font-semibold text-white">University<br />of Florida</p>
                     <p className="text-sm text-white/60">Computer Science</p>
@@ -789,7 +791,7 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center shrink-0 overflow-hidden">
+                  <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src="/images/baron.svg"
                       alt="Baron Technologies"
@@ -798,7 +800,7 @@ export default function Home() {
                       className="w-10 h-10 object-contain"
                       sizes="56px"
                     />
-                  </div>
+                  </GlassEffect>
                   <div>
                     <p className="font-semibold text-white">Baron Technologies</p>
                     <p className="text-sm text-white/60">Software Engineer</p>
@@ -812,11 +814,11 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: timelineVisible ? 0.24 : 0, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+                  <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
                     <span className="block w-full h-full text-[#774AA4]">
                       <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
                     </span>
-                  </div>
+                  </GlassEffect>
                   <div>
                     <p className="font-semibold text-white">Datadog</p>
                     <p className="text-sm text-white/60">Incoming SWE</p>
@@ -843,9 +845,9 @@ export default function Home() {
               style={{ opacity: skillsTitleOpacity, y: skillsTitleY }}
               className="flex justify-center mb-10"
             >
-              <div className="px-7 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
+              <GlassEffect className="px-7 py-2.5 rounded-full shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
                 <h2 className="text-2xl font-bold text-white">My Skills</h2>
-              </div>
+              </GlassEffect>
             </motion.div>
             <div className="flex flex-col gap-6">
               {SKILL_CATEGORIES.map(({ label, skills }, catIdx) => {
@@ -878,9 +880,9 @@ export default function Home() {
               style={{ opacity: projectsTitleOpacity, y: projectsTitleY }}
               className="flex justify-center mb-10"
             >
-              <div className="px-7 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
+              <GlassEffect className="px-7 py-2.5 rounded-full shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
                 <h2 className="text-2xl font-bold text-white">My Projects</h2>
-              </div>
+              </GlassEffect>
             </motion.div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
               {PROJECTS.map((project, i) => (
@@ -898,7 +900,7 @@ export default function Home() {
 
       {/* Contact Section */}
       <ScrollSection id="contact">
-        <div className="max-w-md p-8 text-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+        <GlassEffect className="max-w-md p-8 text-center rounded-2xl">
           <h2 className="text-3xl font-bold text-white mb-6 drop-shadow-lg">
             Get In Touch
           </h2>
@@ -906,16 +908,18 @@ export default function Home() {
             Have an idea, a question, or just want to connect? I&apos;d love to hear from you.
           </p>
           <div className="flex items-center justify-center gap-3">
-            <a
+            <GlassEffect
+              as="a"
               href="mailto:jaedonataylor@gmail.com"
-              className="px-6 py-3 text-base bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all"
+              className="px-6 py-3 text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
             >
               Contact Me
-            </a>
-            <a
+            </GlassEffect>
+            <GlassEffect
+              as="a"
               href="/resume.pdf"
               download="JaedonTaylor_Resume.pdf"
-              className="flex items-center gap-2 px-6 py-3 text-base bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all"
+              className="flex items-center gap-2 px-6 py-3 text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -924,9 +928,9 @@ export default function Home() {
                 <line x1="8" y1="17" x2="16" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               Resume
-            </a>
+            </GlassEffect>
           </div>
-        </div>
+        </GlassEffect>
       </ScrollSection>
       </motion.div>
     </div>
