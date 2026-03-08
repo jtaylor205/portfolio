@@ -3,12 +3,32 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Aurora background color variables */
+  --white: white;
+  --black: black;
+  --transparent: transparent;
+  --blue-500: rgb(13, 148, 136);
+  --indigo-300: rgb(45, 212, 191);
+  --blue-300: rgb(16, 185, 129);
+  --violet-200: rgb(52, 211, 153);
+  --blue-400: rgb(6, 182, 212);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
+  --animate-aurora: aurora 60s linear infinite;
+}
+
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

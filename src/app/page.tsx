@@ -6,7 +6,8 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
 import SocialButtons from "@/components/SocialButtons";
-import ThreeBackground from "@/components/background/ThreeBackground";
+import AuroraBackground from "@/components/background/AuroraBackground";
+import { TextShimmer } from "@/components/ui/TextShimmer";
 
 type ScrollSectionProps = {
   id: string;
@@ -490,7 +491,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen">
-      <ThreeBackground />
+      <AuroraBackground />
       <GlassNavBar activeId={activeId} onSelect={handleNavSelect} />
       <SocialButtons />
       <motion.div style={{ opacity: contentOpacity }}>
@@ -733,7 +734,7 @@ export default function Home() {
               <p className="text-xs md:text-sm uppercase tracking-[0.26em] text-white/60 mb-4">
                 Hello, I&apos;m Jaedon
               </p>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-5 md:mb-6 drop-shadow-lg leading-tight md:leading-snug">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-5 md:mb-6 leading-tight md:leading-snug">
                 Building systems that scale, and software that lasts.
               </h2>
               <p className="text-white/90 text-base md:text-lg leading-relaxed md:leading-relaxed">
@@ -765,7 +766,7 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: timelineVisible ? 0 : 0.24, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="relative w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src="/images/uf-block.svg"
                       alt="University of Florida"
@@ -788,7 +789,7 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden">
+                  <div className="relative w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src="/images/baron.svg"
                       alt="Baron Technologies"
@@ -811,7 +812,7 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: timelineVisible ? 0.24 : 0, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.1)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
                     <span className="block w-full h-full text-[#774AA4]">
                       <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
                     </span>
@@ -902,11 +903,11 @@ export default function Home() {
             Get In Touch
           </h2>
           <p className="text-white/90 text-lg mb-8 leading-relaxed">
-            Ready to work together? Let&apos;s create something amazing!
+            Have an idea, a question, or just want to connect? I&apos;d love to hear from you.
           </p>
           <div className="flex items-center justify-center gap-3">
             <a
-              href="mailto:jtaylor205@ufl.edu"
+              href="mailto:jaedonataylor@gmail.com"
               className="px-6 py-3 text-base bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all"
             >
               Contact Me
