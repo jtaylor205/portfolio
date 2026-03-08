@@ -280,22 +280,23 @@ function ProjectCard({
 }: Project & { index: number; visible: boolean }) {
   return (
     <motion.div
+      className="h-full flex flex-col"
       initial={{ opacity: 0, y: 24 }}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.4, delay: visible ? index * 0.07 : (PROJECTS.length - 1 - index) * 0.07, ease: "easeOut" }}
     >
-      <GlassEffect className="rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden min-h-[220px]">
+      <GlassEffect className="h-full rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden">
       {/* Accent bar */}
       <div className="h-1 w-full shrink-0" style={{ background: accent }} />
 
-      <div className="p-7 flex flex-col gap-3 flex-1">
-        <div>
+      <div className="p-7 flex flex-col gap-3 flex-1 min-h-0">
+        <div className="flex-1 min-h-0">
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{category}</p>
           <h3 className="text-lg font-bold text-white leading-snug mb-2">{name}</h3>
           <p className="text-sm text-white/60 leading-relaxed">{description}</p>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+        <div className="flex flex-wrap gap-1.5 mt-auto pt-2 shrink-0">
           {tech.map(({ slug, name: techName }) => (
             <GlassEffect
               key={slug}
@@ -841,7 +842,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold text-white">My Projects</h2>
               </GlassEffect>
             </motion.div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
               {PROJECTS.map((project, i) => (
                 <ProjectCard
                   key={project.name}
