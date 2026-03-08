@@ -1,0 +1,8 @@
+<svg viewBox="0 0 220 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left < bracket: hexagonal chevron, split red/blue -->
+  <polygon points="38,4 90,4 58,50 6,50"   fill="#EA4335"/>
+  <polygon points="6,50 58,50 90,96 38,96"  fill="#4285F4"/>
+  <!-- Right > bracket: hexagonal chevron, split green/yellow -->
+  <polygon points="130,4 182,4 214,50 162,50" fill="#34A853"/>
+  <polygon points="162,50 214,50 182,96 130,96" fill="#FBBC05"/>
+</svg>

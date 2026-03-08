@@ -44,7 +44,7 @@ const ScrollSection = forwardRef<HTMLElement, ScrollSectionProps>(function Scrol
   );
 });
 
-type Skill = { name: string; slug: string; localSrc?: string };
+type Skill = { name: string; slug: string; localSrc?: string; keepColor?: boolean };
 
 const SKILL_CATEGORIES: { label: string; skills: Skill[] }[] = [
   {
@@ -86,29 +86,35 @@ const SKILL_CATEGORIES: { label: string; skills: Skill[] }[] = [
     skills: [
       { name: "Node.js", slug: "nodedotjs" },
       { name: "gRPC", slug: "grpc", localSrc: "/images/grpc.svg" },
-      { name: "Protobuf", slug: "protocolbuffers" },
+      { name: "Protobuf", slug: "protocolbuffers", localSrc: "/images/protobuf.svg" },
       { name: "Kafka", slug: "apachekafka" },
     ],
   },
 ];
 
-const TOTAL_SKILLS = SKILL_CATEGORIES.reduce((sum, c) => sum + c.skills.length, 0);
+const CATEGORY_COUNT = SKILL_CATEGORIES.length;
 
 function SkillPill({
   name,
   slug,
   localSrc,
-  globalIndex,
-  scrollProgress,
-}: Skill & { globalIndex: number; scrollProgress: MotionValue<number> }) {
+  keepColor,
+  index,
+  count,
+  visible,
+}: Skill & { index: number; count: number; visible: boolean }) {
   const [imgError, setImgError] = useState(false);
   const imgSrc = localSrc ?? `https://cdn.simpleicons.org/${slug}/ffffff`;
-  const start = 0.12 + (globalIndex / TOTAL_SKILLS) * 0.60;
-  const end = start + (1 / TOTAL_SKILLS) * 0.60;
-  const opacity = useTransform(scrollProgress, [start, end], [0, 1]);
-  const y = useTransform(scrollProgress, [start, end], [16, 0]);
   return (
-    <motion.div style={{ opacity, y }}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+      transition={{
+        duration: 0.3,
+        delay: visible ? index * 0.045 : (count - 1 - index) * 0.03,
+        ease: "easeOut",
+      }}
+    >
       <GlassEffect className="flex flex-col items-center gap-2 pt-3 pb-2.5 px-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-[76px] cursor-default hover:bg-white/[0.05] transition-colors">
         {imgError ? (
           <span className="h-9 flex items-center text-white/70 text-[10px] font-bold uppercase tracking-wide text-center leading-tight">{name}</span>
@@ -117,7 +123,7 @@ function SkillPill({
           <img
             src={imgSrc}
             alt={name}
-            className={`w-9 h-9 object-contain${localSrc ? " brightness-0 invert" : ""}`}
+            className={`w-9 h-9 object-contain${localSrc && !keepColor ? " brightness-0 invert" : ""}`}
             loading="lazy"
             onError={() => setImgError(true)}
           />
@@ -131,18 +137,27 @@ function SkillPill({
 function SkillCategory({
   label,
   skills,
-  startIndex,
+  categoryIndex,
   scrollProgress,
 }: {
   label: string;
   skills: Skill[];
-  startIndex: number;
+  categoryIndex: number;
   scrollProgress: MotionValue<number>;
 }) {
-  const labelStart = 0.12 + (startIndex / TOTAL_SKILLS) * 0.60;
-  const labelEnd = labelStart + (1 / TOTAL_SKILLS) * 0.60;
-  const labelOpacity = useTransform(scrollProgress, [labelStart, labelEnd], [0, 1]);
-  const labelY = useTransform(scrollProgress, [labelStart, labelEnd], [16, 0]);
+  // Space 4 categories evenly from 0.12 → 0.88 of scroll progress
+  const spacing = 0.88 / CATEGORY_COUNT;
+  const threshold = 0.12 + categoryIndex * spacing;
+  const fadeEnd = threshold + 0.08;
+
+  const labelOpacity = useTransform(scrollProgress, [threshold, fadeEnd], [0, 1]);
+  const labelY = useTransform(scrollProgress, [threshold, fadeEnd], [16, 0]);
+
+  const [visible, setVisible] = useState(false);
+  useMotionValueEvent(scrollProgress, "change", (v) => {
+    setVisible(v > threshold);
+  });
+
   return (
     <div>
       <motion.div style={{ opacity: labelOpacity, y: labelY }} className="flex items-center gap-3 mb-3">
@@ -156,8 +171,9 @@ function SkillCategory({
           <SkillPill
             key={skill.name}
             {...skill}
-            globalIndex={startIndex + i}
-            scrollProgress={scrollProgress}
+            index={i}
+            count={skills.length}
+            visible={visible}
           />
         ))}
       </div>
@@ -325,43 +341,29 @@ export default function Home() {
   const [activeId, setActiveId] = useState('home');
   const scrollTargetRef = useRef<string | null>(null);
   const scrollTargetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [chevronDirection, setChevronDirection] = useState<'down' | 'up'>('down');
   const contentOpacity = useMotionValue(1);
-  const lastScrollY = useRef(0);
-
-  // Home: sticky scroll-reveal – name mounts immediately, chips reveal on scroll
-  const { scrollYProgress: homeProgress } = useScroll({
-    target: homeSectionRef,
-    offset: ["start start", "end end"],
-  });
-  const chip1Opacity = useTransform(homeProgress, [0.10, 0.25], [0, 1]);
-  const chip1Y = useTransform(homeProgress, [0.10, 0.25], [20, 0]);
-  const chip2Opacity = useTransform(homeProgress, [0.38, 0.53], [0, 1]);
-  const chip2Y = useTransform(homeProgress, [0.38, 0.53], [20, 0]);
 
   // About: Apple-style sticky scroll-reveal – card → photos → timeline
   const { scrollYProgress: aboutProgress } = useScroll({
     target: aboutSectionRef,
     offset: ["start start", "end end"],
   });
-  const cardOpacity = useTransform(aboutProgress, [0, 0.12], [0, 1]);
-  const cardY = useTransform(aboutProgress, [0, 0.12], [28, 0]);
-  // Per-photo scroll reveals: back-left → back-center → back-right → front
-  const photoOpacity1 = useTransform(aboutProgress, [0.15, 0.22], [0, 1]);
-  const photoY1      = useTransform(aboutProgress, [0.15, 0.22], [20, 0]);
-  const photoOpacity2 = useTransform(aboutProgress, [0.20, 0.27], [0, 1]);
-  const photoY2      = useTransform(aboutProgress, [0.20, 0.27], [20, 0]);
-  const photoOpacity3 = useTransform(aboutProgress, [0.25, 0.32], [0, 1]);
-  const photoY3      = useTransform(aboutProgress, [0.25, 0.32], [20, 0]);
-  const photoOpacity0 = useTransform(aboutProgress, [0.30, 0.37], [0, 1]);
-  const photoY0      = useTransform(aboutProgress, [0.30, 0.37], [20, 0]);
+  const cardOpacity = useTransform(aboutProgress, [0, 0.10], [0, 1]);
+  const cardY = useTransform(aboutProgress, [0, 0.10], [28, 0]);
+  // Per-photo scroll reveals, spaced ~10% apart: back-left → back-center → back-right → front
+  const photoOpacity1 = useTransform(aboutProgress, [0.16, 0.24], [0, 1]);
+  const photoY1      = useTransform(aboutProgress, [0.16, 0.24], [20, 0]);
+  const photoOpacity2 = useTransform(aboutProgress, [0.26, 0.34], [0, 1]);
+  const photoY2      = useTransform(aboutProgress, [0.26, 0.34], [20, 0]);
+  const photoOpacity3 = useTransform(aboutProgress, [0.36, 0.44], [0, 1]);
+  const photoY3      = useTransform(aboutProgress, [0.36, 0.44], [20, 0]);
+  const photoOpacity0 = useTransform(aboutProgress, [0.46, 0.54], [0, 1]);
+  const photoY0      = useTransform(aboutProgress, [0.46, 0.54], [20, 0]);
   const photoOpacities = [photoOpacity0, photoOpacity1, photoOpacity2, photoOpacity3];
   const photoScrollYs  = [photoY0, photoY1, photoY2, photoY3];
-  const lineOpacity = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
-  const lineScaleY = useTransform(aboutProgress, [0.3, 0.4], [0, 1]);
   const [timelineVisible, setTimelineVisible] = useState(false);
   useMotionValueEvent(aboutProgress, "change", (v) => {
-    setTimelineVisible(v > 0.38);
+    setTimelineVisible(v > 0.63);
   });
 
   // Skills: sticky scroll-reveal (Apple-style) – section "stops" and items pop in as you scroll
@@ -426,20 +428,6 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY.current) {
-        setChevronDirection('down');
-      } else if (currentScrollY < lastScrollY.current) {
-        setChevronDirection('up');
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Prevent browser from restoring a random scroll position on refresh
   // and always start at the top.
@@ -496,14 +484,12 @@ export default function Home() {
       <GlassNavBar activeId={activeId} onSelect={handleNavSelect} />
       <SocialButtons />
       <motion.div style={{ opacity: contentOpacity }}>
-      {/* Home: Apple-style sticky block – name mounts immediately, chips reveal on scroll */}
+      {/* Home: full-screen – name and chips animate in on load */}
       <div
         id="home"
         ref={homeSectionRef}
-        className="relative"
-        style={{ height: "320vh" }}
+        className="relative h-screen flex items-center justify-center p-5"
       >
-        <div className="relative sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="flex flex-col items-center gap-6 text-center">
             {/* Name – flip-in on load */}
             <h1
@@ -521,15 +507,23 @@ export default function Home() {
               />
             </h1>
 
-            {/* Glassy subtitle chips – scroll-driven reveal */}
+            {/* Subtitle chips – time-based reveal after name finishes */}
             <div className="flex flex-col items-center gap-3">
-              <motion.div style={{ opacity: chip1Opacity, y: chip1Y }}>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.7, ease: "easeOut" }}
+              >
                 <GlassEffect className="px-5 py-2 rounded-full text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
                   University of Florida Student
                 </GlassEffect>
               </motion.div>
 
-              <motion.div style={{ opacity: chip2Opacity, y: chip2Y }}>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 2.05, ease: "easeOut" }}
+              >
                 <GlassEffect className="px-5 py-2 rounded-full text-sm sm:text-base text-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
                   Incoming Software Engineer @ Datadog
                 </GlassEffect>
@@ -537,71 +531,31 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Scroll indicator – floating chevrons */}
+          {/* Scroll indicator */}
           <motion.div
             className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 2.6 }}
           >
-            <div className="flex flex-col items-center -space-y-2">
-              {/* Top chevron - more opaque */}
-              <motion.svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-white"
-                animate={{
-                  y: [0, 2, 4, 2, 0],
-                  opacity: chevronDirection === 'down' ? [1, 0.8, 0.6, 0.8, 1] : [0.6, 0.8, 1, 0.8, 0.6],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: chevronDirection === 'down' ? 0.3 : 0,
-                }}
-                key={`top-${chevronDirection}`}
+            <div className="flex flex-col items-center gap-3">
+              {/* Mouse outline */}
+              <motion.div
+                className="w-6 h-10 rounded-full border border-white/30 flex justify-center pt-2 relative overflow-hidden"
+                animate={{ y: [0, 5, 0] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <path
-                  d="M7 10L12 15L17 10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                {/* Scrolling dot */}
+                <motion.div
+                  className="w-0.5 h-2.5 rounded-full"
+                  style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0))' }}
+                  animate={{ y: [0, 10, 0], opacity: [1, 0.2, 1] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
                 />
-              </motion.svg>
-              {/* Bottom chevron - more transparent */}
-              <motion.svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-white"
-                animate={{
-                  y: [0, 2, 4, 2, 0],
-                  opacity: chevronDirection === 'down' ? [0.4, 0.28, 0.15, 0.28, 0.4] : [0.15, 0.28, 0.4, 0.28, 0.15],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: chevronDirection === 'down' ? 0 : 0.3,
-                }}
-                key={`bottom-${chevronDirection}`}
-              >
-                <path
-                  d="M7 10L12 15L17 10"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </motion.svg>
+              </motion.div>
+              <span className="text-[10px] font-medium tracking-[0.28em] uppercase text-white/35">Scroll</span>
             </div>
           </motion.div>
-        </div>
       </div>
 
       {/* About: Apple-style sticky block – scroll through section, line then UF → Baron → Datadog reveal */}
@@ -609,7 +563,7 @@ export default function Home() {
         id="about"
         ref={aboutSectionRef}
         className="relative"
-        style={{ height: "400vh" }}
+        style={{ height: "500vh" }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="max-w-6xl w-full grid gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] items-center">
@@ -750,22 +704,28 @@ export default function Home() {
             {/* Timeline: line from UF to Datadog only; items revealed by scroll progress */}
             <div className="w-full max-w-sm h-full">
               <div className="relative flex flex-col justify-between h-full py-6">
-                {/* Vertical line — reveals first (grows down), then timeline items */}
+                {/* Vertical line — grows down after UF is in place, shrinks on exit */}
                 <motion.div
-                  style={{
-                    opacity: lineOpacity,
-                    scaleY: lineScaleY,
-                    transformOrigin: "top",
+                  initial={{ scaleY: 0, opacity: 0 }}
+                  animate={timelineVisible
+                    ? { scaleY: 1, opacity: 1 }
+                    : { scaleY: 0, opacity: 0 }
+                  }
+                  transition={{
+                    duration: timelineVisible ? 0.5 : 0.18,
+                    delay: timelineVisible ? 0.32 : 0,
+                    ease: [0.4, 0, 0.2, 1],
                   }}
+                  style={{ transformOrigin: "top" }}
                   className="absolute left-7 top-[3.5rem] bottom-[3.5rem] w-px bg-gradient-to-b from-white/40 via-white/25 to-white/20"
                   aria-hidden
                 />
 
-                {/* UF */}
+                {/* UF — enters first, exits last */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{ duration: 0.4, delay: timelineVisible ? 0 : 0.24, ease: "easeOut" }}
+                  transition={{ duration: 0.4, delay: timelineVisible ? 0 : 0.20, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
                   <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden">
@@ -784,11 +744,11 @@ export default function Home() {
                   </div>
                 </motion.div>
 
-                {/* Baron */}
+                {/* Baron — enters second, exits second */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }}
+                  transition={{ duration: 0.4, delay: timelineVisible ? 0.14 : 0.10, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
                   <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden">
@@ -807,11 +767,11 @@ export default function Home() {
                   </div>
                 </motion.div>
 
-                {/* Datadog */}
+                {/* Datadog — enters last, exits first */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={timelineVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{ duration: 0.4, delay: timelineVisible ? 0.24 : 0, ease: "easeOut" }}
+                  transition={{ duration: 0.4, delay: timelineVisible ? 0.28 : 0, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
                   <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
@@ -821,7 +781,7 @@ export default function Home() {
                   </GlassEffect>
                   <div>
                     <p className="font-semibold text-white">Datadog</p>
-                    <p className="text-sm text-white/60">Incoming SWE</p>
+                    <p className="text-sm text-white/60">Software Engineer</p>
                   </div>
                 </motion.div>
               </div>
@@ -837,7 +797,7 @@ export default function Home() {
         id="skills"
         ref={skillsSectionRef}
         className="relative"
-        style={{ height: "500vh" }}
+        style={{ height: "380vh" }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="max-w-3xl w-full">
@@ -850,18 +810,15 @@ export default function Home() {
               </GlassEffect>
             </motion.div>
             <div className="flex flex-col gap-6">
-              {SKILL_CATEGORIES.map(({ label, skills }, catIdx) => {
-                const startIndex = SKILL_CATEGORIES.slice(0, catIdx).reduce((sum, c) => sum + c.skills.length, 0);
-                return (
+              {SKILL_CATEGORIES.map(({ label, skills }, catIdx) => (
                   <SkillCategory
                     key={label}
                     label={label}
                     skills={skills}
-                    startIndex={startIndex}
+                    categoryIndex={catIdx}
                     scrollProgress={skillsProgress}
                   />
-                );
-              })}
+              ))}
             </div>
           </div>
         </div>
@@ -899,7 +856,7 @@ export default function Home() {
       </div>
 
       {/* Contact Section */}
-      <ScrollSection id="contact">
+      <section id="contact" className="relative min-h-screen flex items-center justify-center p-5">
         <GlassEffect className="max-w-md p-8 text-center rounded-2xl">
           <h2 className="text-3xl font-bold text-white mb-6 drop-shadow-lg">
             Get In Touch
@@ -931,7 +888,7 @@ export default function Home() {
             </GlassEffect>
           </div>
         </GlassEffect>
-      </ScrollSection>
+      </section>
       </motion.div>
     </div>
   );
