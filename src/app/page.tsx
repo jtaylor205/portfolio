@@ -289,7 +289,7 @@ function ProjectCard({
       {/* Accent bar */}
       <div className="h-1 w-full shrink-0" style={{ background: accent }} />
 
-      <div className="p-7 flex flex-col gap-3 flex-1 min-h-0">
+      <div className="p-5 xl:p-7 flex flex-col gap-3 flex-1 min-h-0">
         <div className="flex-1 min-h-0">
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{category}</p>
           <h3 className="text-lg font-bold text-white leading-snug mb-2">{name}</h3>
@@ -386,6 +386,24 @@ export default function Home() {
   useMotionValueEvent(projectsProgress, "change", (v) => {
     setProjectsVisible(v > 0.35);
   });
+
+  // Responsive photo fan: track viewport width to scale the fan spread
+  const [windowWidth, setWindowWidth] = useState(1280);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Scale fan spread linearly from 0.6× at 1024px to 1.0× at 1280px+
+  const fanScale = Math.min(1, Math.max(0.6, (windowWidth - 1024) / 256 * 0.4 + 0.6));
+  const photoFanTransforms = [
+    { scale: 1.08, x: Math.round(-70 * fanScale),  y: Math.round(36 * fanScale),  rotate: 0 },
+    { scale: 0.96, x: Math.round(-260 * fanScale), y: Math.round(-18 * fanScale), rotate: -24 },
+    { scale: 0.94, x: Math.round(-70 * fanScale),  y: Math.round(-82 * fanScale), rotate: 0 },
+    { scale: 0.96, x: Math.round(120 * fanScale),  y: Math.round(-18 * fanScale), rotate: 24 },
+  ];
 
   const [slotImages, setSlotImages] = useState<Array<'one' | 'two' | 'three' | 'four'>>([
     'one',   // front
@@ -499,12 +517,12 @@ export default function Home() {
             >
               <FlipText
                 word="Jaedon"
-                className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
               />
               <FlipText
                 word="Taylor"
                 startDelay={0.6}
-                className="text-7xl sm:text-8xl md:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
               />
             </h1>
 
@@ -574,15 +592,8 @@ export default function Home() {
               {slotImages.map((imageKey, slotIndex) => {
                 const isFront = slotIndex === 0;
 
-                const baseTransforms = [
-                  { scale: 1.08, x: -70, y: 36, rotate: 0 },           // front (slightly larger)
-                  { scale: 0.96, x: -260, y: -18, rotate: -24 },       // left – wide fan but closer
-                  { scale: 0.94, x: -70, y: -82, rotate: 0 },          // center – a bit lower
-                  { scale: 0.96, x: 120, y: -18, rotate: 24 },         // right – wide fan but closer
-                ] as const;
-
                 const zIndexBySlot = [40, 20, 15, 10] as const;
-                const { scale, x, y, rotate } = baseTransforms[slotIndex];
+                const { scale, x, y, rotate } = photoFanTransforms[slotIndex];
 
                 const hover = isFront
                   ? undefined
@@ -684,10 +695,10 @@ export default function Home() {
           {/* Right column: card + timeline — scroll-driven (Lenis) so they appear as section lands */}
           <motion.div
             style={{ opacity: cardOpacity, y: cardY }}
-            className="grid grid-cols-1 md:grid-cols-[minmax(38rem,1fr)_auto] gap-8 md:gap-10 min-w-0 w-full md:pl-16"
+            className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-8 xl:gap-10 min-w-0 w-full"
           >
             {/* Copy card — height drives timeline column */}
-            <GlassEffect className="relative z-50 w-full max-w-xl lg:max-w-3xl p-6 md:p-9 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
+            <GlassEffect className="relative z-50 w-full max-w-3xl p-6 xl:p-9 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
               <p className="text-xs md:text-sm uppercase tracking-[0.26em] text-white/60 mb-4">
                 Hello, I&apos;m Jaedon
               </p>
@@ -798,7 +809,7 @@ export default function Home() {
         id="skills"
         ref={skillsSectionRef}
         className="relative"
-        style={{ height: "380vh" }}
+        style={{ height: "520vh" }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
           <div className="max-w-3xl w-full">
@@ -842,7 +853,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold text-white">My Projects</h2>
               </GlassEffect>
             </motion.div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
               {PROJECTS.map((project, i) => (
                 <ProjectCard
                   key={project.name}
