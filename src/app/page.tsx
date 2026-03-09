@@ -1,13 +1,12 @@
 'use client';
 
 import Image from "next/image";
-import { motion, useScroll, useTransform, useMotionValue, useMotionValueEvent, animate, type MotionValue } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useMotionValueEvent, animate, type MotionValue } from "framer-motion";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
 import SocialButtons from "@/components/SocialButtons";
 import AuroraBackground from "@/components/background/AuroraBackground";
-import { FlipText } from "@/components/ui/FlipText";
 import { GlassEffect, GlassFilter } from "@/components/ui/GlassEffect";
 
 type ScrollSectionProps = {
@@ -186,7 +185,7 @@ type Project = {
   category: string;
   description: string;
   accent: string;
-  tech: { name: string; slug: string }[];
+  tech: { name: string; slug: string; localSrc?: string }[];
   github?: string;
 };
 
@@ -194,7 +193,7 @@ const PROJECTS: Project[] = [
   {
     name: "HTTP Capture & Replay",
     category: "Developer Tools",
-    description: "A local reverse proxy that intercepts HTTP(S) traffic, redacts sensitive data at capture time, and replays full multi-request sessions via a web UI.",
+    description: "A local reverse proxy that intercepts HTTP(S) traffic, redacts sensitive data at capture time, and replays full multi-request sessions.",
     accent: "linear-gradient(90deg, #38bdf8, #6366f1)",
     tech: [
       { name: "Go", slug: "go" },
@@ -207,7 +206,7 @@ const PROJECTS: Project[] = [
   {
     name: "Solace",
     category: "Mobile App / AI",
-    description: "An AI-powered wellness companion that delivers personalized mental health support, mood tracking, and guided exercises using Google Gemini.",
+    description: "An AI-powered wellness companion that delivers personalized mental health support, mood tracking, and journaling.",
     accent: "linear-gradient(90deg, #a855f7, #ec4899)",
     tech: [
       { name: "React Native", slug: "react" },
@@ -220,13 +219,14 @@ const PROJECTS: Project[] = [
   {
     name: "Interview Coach",
     category: "Web Development / AI",
-    description: "A LeetCode-style platform for behavioral interview prep — record yourself answering questions, get AI feedback on your responses, and build structured answer outlines.",
+    description: "A LeetCode-style platform for behavioral interview prep — record answers, get AI feedback, and build structured outlines.",
     accent: "linear-gradient(90deg, #6366f1, #a855f7)",
     tech: [
       { name: "React", slug: "react" },
       { name: "TypeScript", slug: "typescript" },
       { name: "Vite", slug: "vite" },
       { name: "Tailwind CSS", slug: "tailwindcss" },
+      { name: "Gemini", slug: "googlegemini" },
     ],
     github: "https://github.com/jtaylor205/interview-practice",
   },
@@ -242,23 +242,19 @@ const PROJECTS: Project[] = [
     github: "https://github.com/jtaylor205/food-fridge",
   },
   {
-    name: "Phone Guru",
-    category: "Web Development / AI",
-    description: "An AI web tool that recommends the right smartphone for any user through a conversational interface powered by OpenAI.",
-    accent: "linear-gradient(90deg, #f97316, #eab308)",
+    name: "Chess Analysis",
+    category: "Data & Algorithms",
+    description: "A meta-analysis tool that processes large tournament datasets to evaluate opening strategies, player performance, and competitive match statistics.",
+    accent: "linear-gradient(90deg, #93c5fd, #6ee7b7)",
     tech: [
       { name: "Python", slug: "python" },
-      { name: "HTML", slug: "html5" },
-      { name: "CSS", slug: "css" },
-      { name: "JavaScript", slug: "javascript" },
-      { name: "OpenAI", slug: "chatgpt" },
     ],
-    github: "https://github.com/jtaylor205/Phone-Guru",
+    github: "https://github.com/jtaylor205/Chess-Analysis",
   },
   {
     name: "File System",
     category: "Operating Systems",
-    description: "A userspace filesystem daemon using the FUSE API, designed to read from and write to WAD files. Also utilizes a C++ library for parsing and manipulating WAD file headers, descriptors, and lump data.",
+    description: "A userspace filesystem daemon using the FUSE API, designed to read from and write to WAD files.",
     accent: "linear-gradient(90deg, #ef4444, #f97316)",
     tech: [
       { name: "C", slug: "c" },
@@ -277,34 +273,38 @@ function ProjectCard({
   github,
   index,
   visible,
-}: Project & { index: number; visible: boolean }) {
+  onClick,
+}: Project & { index: number; visible: boolean; onClick: () => void }) {
   return (
     <motion.div
-      className="h-full flex flex-col"
+      className="h-full flex flex-col cursor-pointer"
       initial={{ opacity: 0, y: 24 }}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.4, delay: visible ? index * 0.07 : (PROJECTS.length - 1 - index) * 0.07, ease: "easeOut" }}
+      onClick={onClick}
     >
-      <GlassEffect className="h-full rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden">
+      <GlassEffect className="h-full rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden hover:bg-white/[0.04] transition-colors relative">
       {/* Accent bar */}
       <div className="h-1 w-full shrink-0" style={{ background: accent }} />
 
-      <div className="p-5 xl:p-7 flex flex-col gap-3 flex-1 min-h-0">
-        <div className="flex-1 min-h-0">
+      <div className="p-4 md:p-5 xl:p-7 flex flex-col flex-1 min-h-0">
+        <div className="shrink-0 mb-2">
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{category}</p>
-          <h3 className="text-lg font-bold text-white leading-snug mb-2">{name}</h3>
-          <p className="text-sm text-white/60 leading-relaxed">{description}</p>
+          <h3 className="text-sm md:text-base lg:text-lg font-bold text-white leading-snug mb-1.5">{name}</h3>
+          <p className="text-xs md:text-sm text-white/60 leading-relaxed line-clamp-2 md:line-clamp-3 lg:line-clamp-none">{description}</p>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 mt-auto pt-2 shrink-0">
-          {tech.map(({ slug, name: techName }) => (
+        <div className="flex-1" />
+
+        <div className="flex flex-wrap gap-1.5 shrink-0">
+          {tech.map(({ slug, name: techName, localSrc }) => (
             <GlassEffect
               key={slug}
               className="w-9 h-9 rounded-lg flex items-center justify-center"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`https://cdn.simpleicons.org/${slug}/ffffff`}
+                src={localSrc ?? `https://cdn.simpleicons.org/${slug}/ffffff`}
                 alt={techName}
                 className="w-5 h-5 object-contain"
                 loading="lazy"
@@ -314,20 +314,22 @@ function ProjectCard({
           ))}
         </div>
 
-        {github && (
+      </div>
+
+      {github && (
+        <div className="absolute bottom-3 right-3" onClick={(e) => e.stopPropagation()}>
           <GlassEffect
             as="a"
             href={github}
             target="_blank"
             rel="noopener noreferrer"
-            className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors"
+            className="group flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/[0.08] transition-colors"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-3.5 h-3.5 object-contain" loading="lazy" />
-            GitHub
+            <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-4 h-4 object-contain opacity-50 group-hover:opacity-100 transition-opacity" loading="lazy" />
           </GlassEffect>
-        )}
-      </div>
+        </div>
+      )}
       </GlassEffect>
     </motion.div>
   );
@@ -343,6 +345,7 @@ export default function Home() {
   const scrollTargetRef = useRef<string | null>(null);
   const scrollTargetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentOpacity = useMotionValue(1);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // About: Apple-style sticky scroll-reveal – card → photos → timeline
   const { scrollYProgress: aboutProgress } = useScroll({
@@ -447,6 +450,11 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedProject(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   // Prevent browser from restoring a random scroll position on refresh
   // and always start at the top.
@@ -510,20 +518,43 @@ export default function Home() {
         className="relative h-screen flex items-center justify-center p-5"
       >
           <div className="flex flex-col items-center gap-6 text-center">
-            {/* Name – flip-in on load */}
+            {/* Name – stacked wipe-up reveal with underline */}
             <h1
-              className="flex gap-6 sm:gap-8 md:gap-10"
-              style={{ fontFamily: 'var(--font-monument-wide), var(--font-poppins), system-ui' }}
+              className="flex flex-col items-center leading-none text-center"
+              style={{ fontFamily: 'var(--font-outfit), system-ui' }}
             >
-              <FlipText
-                word="Jaedon"
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
-              />
-              <FlipText
-                word="Taylor"
-                startDelay={0.6}
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold tracking-[0.05em] uppercase text-white drop-shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
-              />
+              {/* First name */}
+              <div className="overflow-hidden">
+                <motion.span
+                  initial={{ y: "105%" }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.75, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-[0.12em] uppercase text-white"
+                >
+                  Jaedon
+                </motion.span>
+              </div>
+
+              {/* Last name + animated underline */}
+              <div className="relative mt-1 sm:mt-2">
+                <div className="overflow-hidden">
+                  <motion.span
+                    initial={{ y: "105%" }}
+                    animate={{ y: 0 }}
+                    transition={{ duration: 0.75, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-[0.12em] uppercase text-white"
+                  >
+                    Taylor
+                  </motion.span>
+                </div>
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.65, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transformOrigin: "left", background: "linear-gradient(to right, rgba(255,255,255,0.55) 60%, transparent 100%)" }}
+                  className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-[3px] rounded-full"
+                />
+              </div>
             </h1>
 
             {/* Subtitle chips – time-based reveal after name finishes */}
@@ -585,7 +616,7 @@ export default function Home() {
         style={{ height: "500vh" }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center p-5">
-          <div className="max-w-6xl w-full grid gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.65fr)] items-center">
+          <div className="max-w-6xl xl:max-w-7xl w-full grid gap-10 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.8fr)] items-center" style={{ transform: `translateX(${Math.round(70 * fanScale)}px)` }}>
           {/* Photo stack of four — left column, scroll-driven reveal */}
           <div className="relative -ml-4 md:-ml-20 flex justify-start">
             <div className="relative w-full max-w-md aspect-[4/5]">
@@ -698,7 +729,7 @@ export default function Home() {
             className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-8 xl:gap-10 min-w-0 w-full"
           >
             {/* Copy card — height drives timeline column */}
-            <GlassEffect className="relative z-50 w-full max-w-3xl p-6 xl:p-9 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
+            <GlassEffect className="relative z-50 w-full p-6 xl:p-10 2xl:p-12 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
               <p className="text-xs md:text-sm uppercase tracking-[0.26em] text-white/60 mb-4">
                 Hello, I&apos;m Jaedon
               </p>
@@ -843,23 +874,24 @@ export default function Home() {
         className="relative"
         style={{ height: "400vh" }}
       >
-        <div className="sticky top-0 h-screen flex items-center justify-center p-5">
+        <div className="sticky top-0 h-screen flex flex-col items-center justify-center px-5 py-20">
           <div className="max-w-5xl w-full">
             <motion.div
               style={{ opacity: projectsTitleOpacity, y: projectsTitleY }}
-              className="flex justify-center mb-10"
+              className="flex justify-center mb-6 shrink-0"
             >
               <GlassEffect className="px-7 py-2.5 rounded-full shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
                 <h2 className="text-2xl font-bold text-white">My Projects</h2>
               </GlassEffect>
             </motion.div>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr h-[clamp(480px,68vh,700px)]">
               {PROJECTS.map((project, i) => (
                 <ProjectCard
                   key={project.name}
                   {...project}
                   index={i}
                   visible={projectsVisible}
+                  onClick={() => setSelectedProject(project)}
                 />
               ))}
             </div>
@@ -902,6 +934,72 @@ export default function Home() {
         </GlassEffect>
       </section>
       </motion.div>
+
+      {/* Project modal overlay */}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSelectedProject(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="max-w-lg w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GlassEffect className="rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
+                <div className="h-1 w-full shrink-0" style={{ background: selectedProject.accent }} />
+                <div className="p-7">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{selectedProject.category}</p>
+                      <h3 className="text-2xl font-bold text-white leading-snug">{selectedProject.name}</h3>
+                    </div>
+                    <button
+                      onClick={() => setSelectedProject(null)}
+                      className="ml-4 shrink-0 text-white/40 hover:text-white transition-colors"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed mb-5">{selectedProject.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {selectedProject.tech.map(({ slug, name: techName, localSrc }) => (
+                      <GlassEffect key={slug} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={localSrc ?? `https://cdn.simpleicons.org/${slug}/ffffff`} alt={techName} className="w-4 h-4 object-contain" loading="lazy" />
+                        <span className="text-xs text-white/70">{techName}</span>
+                      </GlassEffect>
+                    ))}
+                  </div>
+                  {selectedProject.github && (
+                    <GlassEffect
+                      as="a"
+                      href={selectedProject.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/[0.05] transition-colors"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-4 h-4 object-contain" loading="lazy" />
+                      View on GitHub
+                    </GlassEffect>
+                  )}
+                </div>
+              </GlassEffect>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
-import localFont from "next/font/local";
+import { Poppins, Outfit } from "next/font/google";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -9,20 +8,10 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const monumentWide = localFont({
-  src: [
-    {
-      path: "../../public/fonts/otf/PPMonumentWide-Regular.otf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/otf/PPMonumentWide-Black.otf",
-      weight: "900",
-      style: "normal",
-    },
-  ],
-  variable: "--font-monument-wide",
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -38,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} ${monumentWide.variable} antialiased`}
+        className={`${poppins.variable} ${outfit.variable} antialiased`}
       >
         {children}
       </body>
