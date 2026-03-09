@@ -775,16 +775,19 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: timelineVisible ? 0 : 0.20, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden">
-                    <Image
-                      src="/images/uf-block.svg"
-                      alt="University of Florida"
-                      width={48}
-                      height={48}
-                      className="w-10 h-10 object-contain"
-                      sizes="56px"
-                    />
-                  </GlassEffect>
+                  <div className="relative rounded-2xl shrink-0">
+                    <GlowingEffect disabled={false} spread={60} inactiveZone={0} proximity={70} borderWidth={2} movementDuration={1.2} />
+                    <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden">
+                      <Image
+                        src="/images/uf-block.svg"
+                        alt="University of Florida"
+                        width={48}
+                        height={48}
+                        className="w-10 h-10 object-contain"
+                        sizes="56px"
+                      />
+                    </GlassEffect>
+                  </div>
                   <div>
                     <p className="font-semibold text-white">University<br />of Florida</p>
                     <p className="text-sm text-white/60">Computer Science</p>
@@ -798,16 +801,19 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: timelineVisible ? 0.14 : 0.10, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden">
-                    <Image
-                      src="/images/baron.svg"
-                      alt="Baron Technologies"
-                      width={48}
-                      height={48}
-                      className="w-10 h-10 object-contain"
-                      sizes="56px"
-                    />
-                  </GlassEffect>
+                  <div className="relative rounded-2xl shrink-0">
+                    <GlowingEffect disabled={false} spread={60} inactiveZone={0} proximity={70} borderWidth={2} movementDuration={1.2} />
+                    <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden">
+                      <Image
+                        src="/images/baron.svg"
+                        alt="Baron Technologies"
+                        width={48}
+                        height={48}
+                        className="w-10 h-10 object-contain"
+                        sizes="56px"
+                      />
+                    </GlassEffect>
+                  </div>
                   <div>
                     <p className="font-semibold text-white">Baron Technologies</p>
                     <p className="text-sm text-white/60">Software Engineer</p>
@@ -821,11 +827,14 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: timelineVisible ? 0.28 : 0, ease: "easeOut" }}
                   className="relative z-10 flex flex-row items-center gap-4"
                 >
-                  <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
-                    <span className="block w-full h-full text-[#774AA4]">
-                      <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
-                    </span>
-                  </GlassEffect>
+                  <div className="relative rounded-2xl shrink-0">
+                    <GlowingEffect disabled={false} spread={60} inactiveZone={0} proximity={70} borderWidth={2} movementDuration={1.2} />
+                    <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden p-1.5">
+                      <span className="block w-full h-full text-[#774AA4]">
+                        <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
+                      </span>
+                    </GlassEffect>
+                  </div>
                   <div>
                     <p className="font-semibold text-white">Datadog</p>
                     <p className="text-sm text-white/60">Software Engineer</p>
