@@ -116,7 +116,7 @@ function SkillPill({
         ease: "easeOut",
       }}
     >
-      <GlassEffect className="flex flex-col items-center gap-2 pt-3 pb-2.5 px-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-[76px] cursor-default hover:bg-white/[0.05] transition-colors">
+      <GlassEffect className="flex flex-col items-center gap-2 pt-3 pb-2.5 px-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.10)] w-[68px] sm:w-[76px] cursor-default hover:bg-white/[0.05] transition-colors">
         {imgError ? (
           <span className="h-9 flex items-center text-white/70 text-[10px] font-bold uppercase tracking-wide text-center leading-tight">{name}</span>
         ) : (
@@ -290,7 +290,7 @@ function ProjectCard({
       {/* Accent bar */}
       <div className="h-1 w-full shrink-0" style={{ background: accent }} />
 
-      <div className="p-4 md:p-5 xl:p-7 flex flex-col flex-1 min-h-0">
+      <div className="p-3 sm:p-4 md:p-5 xl:p-7 flex flex-col flex-1 min-h-0">
         <div className="shrink-0 mb-2">
           <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{category}</p>
           <h3 className="text-sm md:text-base lg:text-lg font-bold text-white leading-snug mb-1.5">{name}</h3>
@@ -615,13 +615,59 @@ export default function Home() {
       <div
         id="about"
         ref={aboutSectionRef}
-        className="relative"
-        style={{ height: "500vh" }}
+        className="relative h-auto md:h-[500vh]"
       >
-        <div className="sticky top-0 h-screen flex items-center justify-center p-5">
-          <div className="max-w-6xl xl:max-w-7xl w-full grid gap-10 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.8fr)] items-center" style={{ transform: `translateX(${Math.round(70 * fanScale)}px)` }}>
-          {/* Photo stack of four — left column, scroll-driven reveal */}
-          <div className="relative -ml-4 md:-ml-20 flex justify-start">
+        {/* ── Mobile about layout (no sticky scroll) ── */}
+        <div className="md:hidden px-5 py-20 flex flex-col gap-6">
+          <GlassEffect className="relative w-full p-6 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
+            <p className="text-xs uppercase tracking-[0.26em] text-white/60 mb-3">Hello, I&apos;m Jaedon</p>
+            <h2 className="text-2xl font-bold text-white mb-4 leading-snug">
+              Building systems that scale, and software that lasts.
+            </h2>
+            <p className="text-white/80 text-sm leading-relaxed">
+              I&apos;m a Computer Science student at the University of Florida and an incoming Software Engineer
+              at Datadog. I gravitate toward backend and distributed systems work, building software that has
+              to hold up when things get complicated. I&apos;ve worked across the stack and pick up whatever
+              the problem needs. I care about writing code that&apos;s correct, fast, and built to last.
+            </p>
+          </GlassEffect>
+
+          {/* Mobile timeline */}
+          <div className="flex flex-col gap-4 px-1">
+            {[
+              { src: "/images/uf-block.svg", alt: "University of Florida", title: "University of Florida", sub: "Computer Science", isImg: true },
+              { src: "/images/baron.svg", alt: "Baron Technologies", title: "Baron Technologies", sub: "Software Engineer", isImg: true },
+            ].map(({ src, alt, title, sub }) => (
+              <div key={title} className="flex items-center gap-4">
+                <GlassEffect className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt={alt} className="w-8 h-8 object-contain" />
+                </GlassEffect>
+                <div>
+                  <p className="font-semibold text-white text-sm">{title}</p>
+                  <p className="text-xs text-white/60">{sub}</p>
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center gap-4">
+              <GlassEffect className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+                <span className="block w-full h-full text-[#774AA4]">
+                  <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
+                </span>
+              </GlassEffect>
+              <div>
+                <p className="font-semibold text-white text-sm">Datadog</p>
+                <p className="text-xs text-white/60">Software Engineer</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Desktop sticky scroll layout ── */}
+        <div className="hidden md:flex sticky top-0 h-screen items-center justify-center p-5">
+          <div className="max-w-6xl xl:max-w-7xl w-full grid gap-6 md:gap-10 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.8fr)] items-center" style={{ transform: windowWidth < 768 ? 'none' : `translateX(${Math.round(70 * fanScale)}px)` }}>
+          {/* Photo stack of four — left column, scroll-driven reveal, hidden on mobile */}
+          <div className="relative -ml-4 md:-ml-20 hidden md:flex justify-start">
             <div className="relative w-full max-w-md aspect-[4/5]">
               {slotImages.map((imageKey, slotIndex) => {
                 const isFront = slotIndex === 0;
@@ -844,7 +890,7 @@ export default function Home() {
             </div>
           </motion.div>
         </div>
-        </div>
+        </div>{/* end desktop sticky */}
       </div>
 
       {/* Skills Section */}
@@ -852,10 +898,43 @@ export default function Home() {
       <div
         id="skills"
         ref={skillsSectionRef}
-        className="relative"
-        style={{ height: "520vh" }}
+        className="relative h-auto md:h-[520vh]"
       >
-        <div className="sticky top-0 h-screen flex items-center justify-center p-5">
+        {/* ── Mobile skills layout (no sticky scroll) ── */}
+        <div className="md:hidden px-5 py-20 flex flex-col gap-2">
+          <div className="flex justify-center mb-6">
+            <GlassEffect className="px-7 py-2.5 rounded-full shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
+              <h2 className="text-2xl font-bold text-white">My Skills</h2>
+            </GlassEffect>
+          </div>
+          <div className="flex flex-col gap-6">
+            {SKILL_CATEGORIES.map(({ label, skills }) => (
+              <div key={label}>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[10px] uppercase tracking-[0.18em] text-white/40 font-semibold whitespace-nowrap">{label}</span>
+                  <div className="flex-1 h-px bg-gradient-to-r from-white/20 to-transparent" />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {skills.map(({ name, slug, localSrc, keepColor }) => (
+                    <GlassEffect key={name} className="flex flex-col items-center gap-2 pt-3 pb-2.5 px-3 rounded-xl w-[68px]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={localSrc ?? `https://cdn.simpleicons.org/${slug}/ffffff`}
+                        alt={name}
+                        className={`w-9 h-9 object-contain${localSrc && !keepColor ? " brightness-0 invert" : ""}`}
+                        loading="lazy"
+                      />
+                      <span className="text-white/75 text-[11px] font-medium text-center leading-tight">{name}</span>
+                    </GlassEffect>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Desktop sticky scroll layout ── */}
+        <div className="hidden md:flex sticky top-0 h-screen items-center justify-center p-5">
           <div className="max-w-3xl w-full">
             <motion.div
               style={{ opacity: skillsTitleOpacity, y: skillsTitleY }}
@@ -884,10 +963,63 @@ export default function Home() {
       <div
         id="projects"
         ref={projectsSectionRef}
-        className="relative"
-        style={{ height: "400vh" }}
+        className="relative h-auto md:h-[400vh]"
       >
-        <div className="sticky top-0 h-screen flex flex-col items-center justify-center px-5 py-20">
+        {/* ── Mobile projects layout (no sticky scroll) ── */}
+        <div className="md:hidden px-5 py-20 flex flex-col gap-4">
+          <div className="flex justify-center mb-2">
+            <GlassEffect className="px-7 py-2.5 rounded-full shadow-[0_4px_24px_rgba(15,23,42,0.3)]">
+              <h2 className="text-2xl font-bold text-white">My Projects</h2>
+            </GlassEffect>
+          </div>
+          {PROJECTS.map((project) => (
+            <button
+              key={project.name}
+              type="button"
+              onClick={() => setSelectedProject(project)}
+              className="w-full text-left"
+            >
+              <GlassEffect className="w-full rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(15,23,42,0.3)]">
+                <div className="h-1 w-full shrink-0" style={{ background: project.accent }} />
+                <div className="p-4">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{project.category}</p>
+                  <h3 className="text-base font-bold text-white mb-1.5">{project.name}</h3>
+                  <p className="text-xs text-white/60 leading-relaxed mb-3">{project.description}</p>
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    {project.tech.map(({ slug, name: techName, localSrc }) => (
+                      <GlassEffect key={slug} className="w-8 h-8 rounded-lg flex items-center justify-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={localSrc ?? `https://cdn.simpleicons.org/${slug}/ffffff`}
+                          alt={techName}
+                          className="w-4 h-4 object-contain"
+                          loading="lazy"
+                        />
+                      </GlassEffect>
+                    ))}
+                    {project.github && (
+                      <a
+                        href={project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="ml-auto"
+                      >
+                        <GlassEffect className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/[0.08] transition-colors">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" className="w-4 h-4 object-contain opacity-60" loading="lazy" />
+                        </GlassEffect>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </GlassEffect>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Desktop sticky scroll layout ── */}
+        <div className="hidden md:flex sticky top-0 h-screen flex-col items-center justify-center px-5 py-20">
           <div className="max-w-5xl w-full">
             <motion.div
               style={{ opacity: projectsTitleOpacity, y: projectsTitleY }}
@@ -916,18 +1048,18 @@ export default function Home() {
       <section id="contact" className="relative min-h-screen flex items-center justify-center p-5">
         <GlassEffect className="max-w-xl p-8 text-center rounded-2xl relative">
           <GlowingEffect disabled={false} spread={70} inactiveZone={0.1} proximity={60} borderWidth={2} movementDuration={1.5} />
-          <h2 className="text-3xl font-bold text-white mb-6 drop-shadow-lg">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 drop-shadow-lg">
             Get In Touch
           </h2>
-          <p className="text-white/90 text-lg mb-8 leading-relaxed">
+          <p className="text-white/90 text-base sm:text-lg mb-8 leading-relaxed">
             Open to new opportunities, interesting problems, and good conversations.
           </p>
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Magnetic intensity={0.5} range={80}>
               <GlassEffect
                 as="a"
                 href="mailto:jaedonataylor@gmail.com"
-                className="flex items-center gap-2 px-6 py-3 text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 text-sm sm:text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
                   <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -942,7 +1074,7 @@ export default function Home() {
                 href="https://www.linkedin.com/in/jaedon-taylor/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 text-sm sm:text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="shrink-0">
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
@@ -955,7 +1087,7 @@ export default function Home() {
                 as="a"
                 href="/resume.pdf"
                 download="JaedonTaylor_Resume.pdf"
-                className="flex items-center gap-2 px-6 py-3 text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 text-sm sm:text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

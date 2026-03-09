@@ -24,8 +24,13 @@ export function Magnetic({
   actionArea = 'self',
   springOptions = SPRING_CONFIG,
 }: MagneticProps) {
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia("(hover: none)").matches);
+  }, []);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const springX = useSpring(x, springOptions);
@@ -83,6 +88,8 @@ export function Magnetic({
       y.set(0);
     }
   };
+
+  if (isTouchDevice) return <>{children}</>;
 
   return (
     <motion.div

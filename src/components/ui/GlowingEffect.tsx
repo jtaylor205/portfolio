@@ -87,6 +87,7 @@ const GlowingEffect = memo(
 
     useEffect(() => {
       if (disabled) return;
+      if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) return;
       const handleScroll = () => handleMove();
       const handlePointerMove = (e: PointerEvent) => handleMove(e);
       window.addEventListener("scroll", handleScroll, { passive: true });
