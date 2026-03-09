@@ -8,6 +8,7 @@ import GlassNavBar, { SECTIONS } from "@/components/GlassNavBar";
 import SocialButtons from "@/components/SocialButtons";
 import AuroraBackground from "@/components/background/AuroraBackground";
 import { GlassEffect, GlassFilter } from "@/components/ui/GlassEffect";
+import { GlowingEffect } from "@/components/ui/GlowingEffect";
 
 type ScrollSectionProps = {
   id: string;
@@ -277,13 +278,14 @@ function ProjectCard({
 }: Project & { index: number; visible: boolean; onClick: () => void }) {
   return (
     <motion.div
-      className="h-full flex flex-col cursor-pointer"
+      className="h-full flex flex-col cursor-pointer relative rounded-2xl"
       initial={{ opacity: 0, y: 24 }}
       animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.4, delay: visible ? index * 0.07 : (PROJECTS.length - 1 - index) * 0.07, ease: "easeOut" }}
       onClick={onClick}
     >
-      <GlassEffect className="h-full rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden hover:bg-white/[0.04] transition-colors relative">
+      <GlowingEffect disabled={false} spread={45} inactiveZone={0.01} proximity={40} borderWidth={2} movementDuration={1.2} />
+      <GlassEffect className="h-full rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden transition-colors relative">
       {/* Accent bar */}
       <div className="h-1 w-full shrink-0" style={{ background: accent }} />
 
@@ -730,6 +732,7 @@ export default function Home() {
           >
             {/* Copy card — height drives timeline column */}
             <GlassEffect className="relative z-50 w-full p-6 xl:p-10 2xl:p-12 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.7)]">
+              <GlowingEffect disabled={false} spread={60} inactiveZone={0.3} proximity={60} borderWidth={2} movementDuration={1.5} />
               <p className="text-xs md:text-sm uppercase tracking-[0.26em] text-white/60 mb-4">
                 Hello, I&apos;m Jaedon
               </p>
@@ -901,7 +904,8 @@ export default function Home() {
 
       {/* Contact Section */}
       <section id="contact" className="relative min-h-screen flex items-center justify-center p-5">
-        <GlassEffect className="max-w-md p-8 text-center rounded-2xl">
+        <GlassEffect className="max-w-md p-8 text-center rounded-2xl relative">
+          <GlowingEffect disabled={false} spread={70} inactiveZone={0.1} proximity={60} borderWidth={2} movementDuration={1.5} />
           <h2 className="text-3xl font-bold text-white mb-6 drop-shadow-lg">
             Get In Touch
           </h2>
