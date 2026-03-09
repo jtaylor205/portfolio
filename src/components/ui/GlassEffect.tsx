@@ -3,11 +3,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-// Kept as a no-op export so existing imports don't break
-export function GlassFilter() {
-  return null;
-}
-
 interface GlassEffectProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
   href?: string;
