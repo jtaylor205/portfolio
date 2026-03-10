@@ -49,7 +49,7 @@ export default function ContactSection() {
           <Magnetic intensity={0.5} range={80}>
             <GlassEffect
               as="a"
-              href="/resume.pdf"
+              href="/JaedonTaylor_Resume.pdf"
               download="JaedonTaylor_Resume.pdf"
               className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 text-sm sm:text-base rounded-xl text-white hover:bg-white/[0.05] transition-all"
             >

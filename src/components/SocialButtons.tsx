@@ -43,7 +43,7 @@ export default function SocialButtons() {
       <GlassButton
         onClick={() => {
           const link = document.createElement('a');
-          link.href = '/resume.pdf';
+          link.href = '/JaedonTaylor_Resume.pdf';
           link.download = 'JaedonTaylor_Resume.pdf';
           link.click();
         }}
