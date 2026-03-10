@@ -234,8 +234,8 @@ export default function AboutSection() {
                 >
                   <div className="relative rounded-2xl shrink-0">
                     <GlowingEffect disabled={false} spread={60} inactiveZone={0} proximity={70} borderWidth={2} movementDuration={1.2} />
-                    <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden">
-                      <Image src="/images/uf-block.svg" alt="University of Florida" width={48} height={48} className="w-10 h-10 object-contain" sizes="56px" />
+                    <GlassEffect className="w-16 h-16 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden">
+                      <Image src="/images/uf-block.svg" alt="University of Florida" width={48} height={48} className="w-11 h-11 object-contain" sizes="64px" />
                     </GlassEffect>
                   </div>
                   <div>
@@ -253,8 +253,8 @@ export default function AboutSection() {
                 >
                   <div className="relative rounded-2xl shrink-0">
                     <GlowingEffect disabled={false} spread={60} inactiveZone={0} proximity={70} borderWidth={2} movementDuration={1.2} />
-                    <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden">
-                      <Image src="/images/baron.svg" alt="Baron Technologies" width={48} height={48} className="w-10 h-10 object-contain" sizes="56px" />
+                    <GlassEffect className="w-16 h-16 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden">
+                      <Image src="/images/baron.svg" alt="Baron Technologies" width={48} height={48} className="w-11 h-11 object-contain" sizes="64px" />
                     </GlassEffect>
                   </div>
                   <div>
@@ -272,10 +272,8 @@ export default function AboutSection() {
                 >
                   <div className="relative rounded-2xl shrink-0">
                     <GlowingEffect disabled={false} spread={60} inactiveZone={0} proximity={70} borderWidth={2} movementDuration={1.2} />
-                    <GlassEffect className="w-14 h-14 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden p-1.5">
-                      <span className="block w-full h-full text-[#774AA4]">
-                        <span className="block w-full h-full bg-current [mask-image:url('/images/datadog.svg')] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat]" />
-                      </span>
+                    <GlassEffect className="w-16 h-16 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-hidden">
+                      <Image src="/images/datadog.svg" alt="Datadog" width={48} height={48} className="w-11 h-11 object-contain" sizes="64px" />
                     </GlassEffect>
                   </div>
                   <div>
