@@ -71,7 +71,7 @@ const GlowingEffect = memo(
             (180 * Math.atan2(mouseY - center[1], mouseX - center[0])) /
               Math.PI +
             90;
-          const angleDiff = ((targetAngle - currentAngle + 180) % 360) - 180;
+          const angleDiff = (((targetAngle - currentAngle + 180) % 360) + 360) % 360 - 180;
           const newAngle = currentAngle + angleDiff;
           animate(currentAngle, newAngle, {
             duration: movementDuration,
@@ -84,6 +84,21 @@ const GlowingEffect = memo(
       },
       [inactiveZone, proximity, movementDuration]
     );
+
+    useEffect(() => {
+      if (disabled || !containerRef.current) return;
+      const card = containerRef.current.parentElement;
+      if (!card) return;
+      const s = window.getComputedStyle(card);
+      const r = (prop: string) => parseFloat(s.getPropertyValue(prop)) || 0;
+      const radii = [
+        r("border-top-left-radius"),
+        r("border-top-right-radius"),
+        r("border-bottom-right-radius"),
+        r("border-bottom-left-radius"),
+      ].map((v) => `${v + borderWidth}px`).join(" ");
+      containerRef.current.style.setProperty("--glowingeffect-corner-radius", radii);
+    }, [disabled, borderWidth]);
 
     useEffect(() => {
       if (disabled) return;
@@ -156,7 +171,7 @@ const GlowingEffect = memo(
             className={cn(
               "glow",
               "rounded-[inherit]",
-              'after:content-[""] after:rounded-[inherit] after:absolute after:inset-[calc(-1*var(--glowingeffect-border-width))]',
+              'after:content-[""] after:[border-radius:var(--glowingeffect-corner-radius,inherit)] after:absolute after:inset-[calc(-1*var(--glowingeffect-border-width))]',
               "after:[border:var(--glowingeffect-border-width)_solid_transparent]",
               "after:[background:var(--gradient)] after:[background-attachment:fixed]",
               "after:opacity-[var(--active)] after:transition-opacity after:duration-300",
