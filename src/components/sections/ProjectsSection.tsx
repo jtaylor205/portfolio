@@ -12,7 +12,6 @@ function ProjectCard({
   name,
   category,
   description,
-  accent,
   tech,
   github,
   index,
@@ -33,8 +32,6 @@ function ProjectCard({
     >
       <GlowingEffect disabled={false} spread={45} inactiveZone={0.01} proximity={40} borderWidth={2} movementDuration={1.2} />
       <GlassEffect className="h-full rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.3)] flex flex-col overflow-hidden transition-colors relative">
-        {/* Accent bar */}
-        <div className="h-1 w-full shrink-0" style={{ background: accent }} />
 
         <div className="p-3 sm:p-4 md:p-5 xl:p-7 flex flex-col flex-1 min-h-0">
           <div className="shrink-0 mb-2">
@@ -108,7 +105,6 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
         onClick={(e) => e.stopPropagation()}
       >
         <GlassEffect className="rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
-          <div className="h-1 w-full shrink-0" style={{ background: project.accent }} />
           <div className="p-7">
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -216,7 +212,7 @@ export default function ProjectsSection() {
               className="w-full text-left"
             >
               <GlassEffect className="w-full rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(15,23,42,0.3)]">
-                <div className="h-1 w-full shrink-0" style={{ background: project.accent }} />
+                <div className="h-1 w-full shrink-0" />
                 <div className="p-4">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-1">{project.category}</p>
                   <h3 className="text-base font-bold text-white mb-1.5">{project.name}</h3>
